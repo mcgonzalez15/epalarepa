@@ -5,31 +5,24 @@ import java.util.List;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
-public class Condicion {
+public class Condicionn {
 
 
-	@JsonProperty( value = "servicios")
-	private List<Servicio> servicios;
+	@JsonProperty( value = "tipoAlojamiento")
+	private Oferta tipo;
 	
 	@JsonProperty( value = "fechaInicio")
 	private Date fechaInicio;
 	
 	@JsonProperty( value = "fechaFin")
 	private Date fechaFin;
-	
-	public Condicion(@JsonProperty( value = "servicios") List<Servicio> pServicios,@JsonProperty( value = "fechaInicio") Date pFechaInicio,@JsonProperty( value = "fechaFin") Date pFechaFin )
-	{
-		servicios = pServicios;
-		fechaInicio = pFechaInicio;
-		fechaFin = pFechaFin;
+
+	public Oferta getTipo() {
+		return tipo;
 	}
 
-	public List<Servicio> getServicios() {
-		return servicios;
-	}
-
-	public void setServicios(List<Servicio> servicios) {
-		this.servicios = servicios;
+	public void setTipo(Oferta tipo) {
+		this.tipo = tipo;
 	}
 
 	public Date getFechaInicio() {
@@ -47,6 +40,9 @@ public class Condicion {
 	public void setFechaFin(Date fechaFin) {
 		this.fechaFin = fechaFin;
 	}
+	
+	
+	
 	
 	
 }

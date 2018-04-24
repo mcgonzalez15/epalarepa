@@ -18,11 +18,16 @@ import javax.ws.rs.core.Response;
 
 import tm.TransactionManager;
 import vos.Oferta;
+//import vos.AlojamientosTop;
 import vos.Apartamento;
 import vos.Cliente;
+import vos.Condicion;
+import vos.Condicionn;
 import vos.Hostal;
 import vos.Hotel;
+import vos.MejoresOfertas;
 import vos.ViviendaUniversitaria;
+import vos.Documentacion;
 import vos.Operador;
 import vos.Habitacion;
 
@@ -65,22 +70,22 @@ public class OfertasService {
 	//----------------------------------------------------------------------------------------------------------------------------------
 
 	/**
-	 * Metodo GET que trae a todos los Ofertas en la Base de datos. <br/>
+	 * Metodo GET que trae a todos los Alojamientos en la Base de datos. <br/>
 	 * <b>Precondicion: </b> el archivo <em>'conectionData'</em> ha sido inicializado con las credenciales del usuario <br/>
-	 * <b>URL: </b> http://localhost:8080/AlohAndes/rest/Ofertas <br/>
-	 * @return	<b>Response Status 200</b> - JSON que contiene a todos los Ofertas que estan en la Base de Datos <br/>
+	 * <b>URL: </b> http://localhost:8080/AlohAndes/rest/Alojamientos <br/>
+	 * @return	<b>Response Status 200</b> - JSON que contiene a todos los Alojamientos que estan en la Base de Datos <br/>
 	 * 			<b>Response Status 500</b> - Excepcion durante el transcurso de la transaccion
 	 */			
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON })
-	public Response getOfertas() {
+	public Response geOfertas() {
 		
 		try {
 			TransactionManager tm = new TransactionManager(getPath());
 			
-			List<Oferta> Ofertas;
-			Ofertas = tm.getAllOfertas();
-			return Response.status(200).entity(Ofertas).build();
+			List<Oferta> ofertas;
+			ofertas = tm.getAllOfertas();
+			return Response.status(200).entity(ofertas).build();
 		} 
 		catch (Exception e) {
 			return Response.status(500).entity(doErrorMessage(e)).build();
@@ -88,10 +93,10 @@ public class OfertasService {
 	}
 
 	/**
-	 * Metodo GET que trae al Oferta en la Base de Datos con el ID dado por parametro <br/>
+	 * Metodo GET que trae al Alojamiento en la Base de Datos con el ID dado por parametro <br/>
 	 * <b>Precondicion: </b> el archivo <em>'conectionData'</em> ha sido inicializado con las credenciales del usuario <br/>
-	 * <b>URL: </b> http://localhost:8080/TransactionManager/rest/Ofertas/{id} <br/>
-	 * @return	<b>Response Status 200</b> - JSON Oferta que contiene al Oferta cuyo ID corresponda al parametro <br/>
+	 * <b>URL: </b> http://localhost:8080/AlohAndesMaster/rest/Alojamientos/{id} <br/>
+	 * @return	<b>Response Status 200</b> - JSON Alojamiento que contiene al Alojamiento cuyo ID corresponda al parametro <br/>
 	 * 			<b>Response Status 500</b> - Excepcion durante el transcurso de la transaccion
 	 */
 	@GET
@@ -102,8 +107,8 @@ public class OfertasService {
 		try{
 			TransactionManager tm = new TransactionManager( getPath( ) );
 			
-			Oferta Oferta = tm.getOfertaById( id );
-			return Response.status( 200 ).entity( Oferta ).build( );			
+			Oferta Alojamiento = tm.getOfertaById(id);
+			return Response.status( 200 ).entity( Alojamiento ).build( );			
 		}
 		catch( Exception e )
 		{
@@ -112,23 +117,23 @@ public class OfertasService {
 	}
 
 	/**
-	 * Metodo que recibe un Oferta en formato JSON y lo agrega a la Base de Datos <br/>
+	 * Metodo que recibe un Alojamiento en formato JSON y lo agrega a la Base de Datos <br/>
 	 * <b>Precondicion: </b> El archivo <em>'conectionData'</em> ha sido inicializado con las credenciales del usuario <br/>
-	 * <b>Postcondicion: </b> Se agrega a la Base de datos la informacion correspondiente al Oferta. <br/>
-	 * <b>URL: </b> http://localhost:8080/TutorialParranderos/rest/Ofertas <br/>
-	 * @param Oferta JSON con la informacion del Oferta que se desea agregar
-	 * @return	<b>Response Status 200</b> - JSON que contiene al Oferta que ha sido agregado <br/>
+	 * <b>Postcondicion: </b> Se agrega a la Base de datos la informacion correspondiente al Alojamiento. <br/>
+	 * <b>URL: </b> http://localhost:8080/TutorialParranderos/rest/Alojamientos <br/>
+	 * @param Alojamiento JSON con la informacion del Alojamiento que se desea agregar
+	 * @return	<b>Response Status 200</b> - JSON que contiene al Alojamiento que ha sido agregado <br/>
 	 * 			<b>Response Status 500</b> - Excepcion durante el transcurso de la transaccion
 	 */
 	@POST
 	@Produces( { MediaType.APPLICATION_JSON } )
 	@Consumes({ MediaType.APPLICATION_JSON })
-	public Response addOferta(Oferta Oferta) {
+	public Response addOferta(Oferta Alojamiento) {
 		
 		try{
 			TransactionManager tm = new TransactionManager( getPath( ) );
-			tm.addOferta(Oferta);
-			return Response.status( 200 ).entity( Oferta ).build( );			
+			tm.addOferta(Alojamiento);
+			return Response.status( 200 ).entity( Alojamiento ).build( );			
 		}
 		catch( Exception e )
 		{
@@ -162,23 +167,23 @@ public class OfertasService {
 	}
 	
 	/**
-	 * Metodo que recibe un Hostal en formato JSON y lo agrega a la Base de Datos <br/>
+	 * Metodo que recibe un HabHostal en formato JSON y lo agrega a la Base de Datos <br/>
 	 * <b>Precondicion: </b> El archivo <em>'conectionData'</em> ha sido inicializado con las credenciales del usuario <br/>
-	 * <b>Postcondicion: </b> Se agrega a la Base de datos la informacion correspondiente al Hostal. <br/>
-	 * <b>URL: </b> http://localhost:8080/TutorialParranderos/rest/Hostals <br/>
-	 * @param Hostal JSON con la informacion del Hostal que se desea agregar
-	 * @return	<b>Response Status 200</b> - JSON que contiene al Hostal que ha sido agregado <br/>
+	 * <b>Postcondicion: </b> Se agrega a la Base de datos la informacion correspondiente al HabHostal. <br/>
+	 * <b>URL: </b> http://localhost:8080/TutorialParranderos/rest/HabHostals <br/>
+	 * @param HabHostal JSON con la informacion del HabHostal que se desea agregar
+	 * @return	<b>Response Status 200</b> - JSON que contiene al HabHostal que ha sido agregado <br/>
 	 * 			<b>Response Status 500</b> - Excepcion durante el transcurso de la transaccion
 	 */
 	@POST
 	@Produces( { MediaType.APPLICATION_JSON } )
 	@Consumes({ MediaType.APPLICATION_JSON })
-	@Path("habitacioneshostales")
-	public Response addHostal(Hostal Hostal) {
+	@Path("hostales")
+	public Response addHostal(Hostal HabHostal) {
 		try{
 			TransactionManager tm = new TransactionManager( getPath( ) );
-			tm.addHostal(Hostal);
-			return Response.status( 200 ).entity( Hostal ).build( );			
+			tm.addHostal(HabHostal);
+			return Response.status( 200 ).entity( HabHostal ).build( );			
 		}
 		catch( Exception e )
 		{
@@ -186,23 +191,23 @@ public class OfertasService {
 		}
 	}
 	/**
-	 * Metodo que recibe un Hotel en formato JSON y lo agrega a la Base de Datos <br/>
+	 * Metodo que recibe un HabHotel en formato JSON y lo agrega a la Base de Datos <br/>
 	 * <b>Precondicion: </b> El archivo <em>'conectionData'</em> ha sido inicializado con las credenciales del usuario <br/>
-	 * <b>Postcondicion: </b> Se agrega a la Base de datos la informacion correspondiente al Hotel. <br/>
-	 * <b>URL: </b> http://localhost:8080/TutorialParranderos/rest/Hotels <br/>
-	 * @param Hotel JSON con la informacion del Hotel que se desea agregar
-	 * @return	<b>Response Status 200</b> - JSON que contiene al Hotel que ha sido agregado <br/>
+	 * <b>Postcondicion: </b> Se agrega a la Base de datos la informacion correspondiente al HabHotel. <br/>
+	 * <b>URL: </b> http://localhost:8080/TutorialParranderos/rest/HabHotels <br/>
+	 * @param HabHotel JSON con la informacion del HabHotel que se desea agregar
+	 * @return	<b>Response Status 200</b> - JSON que contiene al HabHotel que ha sido agregado <br/>
 	 * 			<b>Response Status 500</b> - Excepcion durante el transcurso de la transaccion
 	 */
 	@POST
 	@Produces( { MediaType.APPLICATION_JSON } )
 	@Consumes({ MediaType.APPLICATION_JSON })
-	@Path("habitacioneshoteles")
-	public Response addHotel(Hotel Hotel) {
+	@Path("hoteles")
+	public Response addHotel(Hotel HabHotel) {
 		try{
 			TransactionManager tm = new TransactionManager( getPath( ) );
-			tm.addHotel(Hotel);
-			return Response.status( 200 ).entity( Hotel ).build( );			
+			tm.addHotel(HabHotel);
+			return Response.status( 200 ).entity( HabHotel ).build( );			
 		}
 		catch( Exception e )
 		{
@@ -210,23 +215,23 @@ public class OfertasService {
 		}
 	}
 	/**
-	 * Metodo que recibe un ViviendaUniversitaria en formato JSON y lo agrega a la Base de Datos <br/>
+	 * Metodo que recibe un HabUniversitaria en formato JSON y lo agrega a la Base de Datos <br/>
 	 * <b>Precondicion: </b> El archivo <em>'conectionData'</em> ha sido inicializado con las credenciales del usuario <br/>
-	 * <b>Postcondicion: </b> Se agrega a la Base de datos la informacion correspondiente al ViviendaUniversitaria. <br/>
-	 * <b>URL: </b> http://localhost:8080/TutorialParranderos/rest/ViviendaUniversitarias <br/>
-	 * @param ViviendaUniversitaria JSON con la informacion del ViviendaUniversitaria que se desea agregar
-	 * @return	<b>Response Status 200</b> - JSON que contiene al ViviendaUniversitaria que ha sido agregado <br/>
+	 * <b>Postcondicion: </b> Se agrega a la Base de datos la informacion correspondiente al HabUniversitaria. <br/>
+	 * <b>URL: </b> http://localhost:8080/TutorialParranderos/rest/HabUniversitarias <br/>
+	 * @param HabUniversitaria JSON con la informacion del HabUniversitaria que se desea agregar
+	 * @return	<b>Response Status 200</b> - JSON que contiene al HabUniversitaria que ha sido agregado <br/>
 	 * 			<b>Response Status 500</b> - Excepcion durante el transcurso de la transaccion
 	 */
 	@POST
 	@Produces( { MediaType.APPLICATION_JSON } )
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Path("viviendasuniversitarias")
-	public Response addViviendaUniversitaria(ViviendaUniversitaria ViviendaUniversitaria) {
+	public Response addViviendaUniversitaria(ViviendaUniversitaria HabUniversitaria) {
 		try{
 			TransactionManager tm = new TransactionManager( getPath( ) );
-			tm.addViviendaUniversitaria(ViviendaUniversitaria);
-			return Response.status( 200 ).entity( ViviendaUniversitaria ).build( );			
+			tm.addViviendaUniversitaria(HabUniversitaria);
+			return Response.status( 200 ).entity( HabUniversitaria ).build( );			
 		}
 		catch( Exception e )
 		{
@@ -234,23 +239,23 @@ public class OfertasService {
 		}
 	}
 	/**
-	 * Metodo que recibe un Habitacion en formato JSON y lo agrega a la Base de Datos <br/>
+	 * Metodo que recibe un Vivienda en formato JSON y lo agrega a la Base de Datos <br/>
 	 * <b>Precondicion: </b> El archivo <em>'conectionData'</em> ha sido inicializado con las credenciales del usuario <br/>
-	 * <b>Postcondicion: </b> Se agrega a la Base de datos la informacion correspondiente al Habitacion. <br/>
-	 * <b>URL: </b> http://localhost:8080/TutorialParranderos/rest/Habitacions <br/>
-	 * @param Habitacion JSON con la informacion del Habitacion que se desea agregar
-	 * @return	<b>Response Status 200</b> - JSON que contiene al Habitacion que ha sido agregado <br/>
+	 * <b>Postcondicion: </b> Se agrega a la Base de datos la informacion correspondiente al Vivienda. <br/>
+	 * <b>URL: </b> http://localhost:8080/TutorialParranderos/rest/Viviendas <br/>
+	 * @param Vivienda JSON con la informacion del Vivienda que se desea agregar
+	 * @return	<b>Response Status 200</b> - JSON que contiene al Vivienda que ha sido agregado <br/>
 	 * 			<b>Response Status 500</b> - Excepcion durante el transcurso de la transaccion
 	 */
 	@POST
 	@Produces( { MediaType.APPLICATION_JSON } )
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Path("habitaciones")
-	public Response addHabitacion(Habitacion Habitacion) {
+	public Response addHabitacion(Habitacion Vivienda) {
 		try{
 			TransactionManager tm = new TransactionManager( getPath( ) );
-			tm.addHabitacion(Habitacion);
-			return Response.status( 200 ).entity( Habitacion ).build( );			
+			tm.addHabitacion(Vivienda);
+			return Response.status( 200 ).entity( Vivienda ).build( );			
 		}
 		catch( Exception e )
 		{
@@ -258,26 +263,148 @@ public class OfertasService {
 		}
 	}
 	/**
-	 * Metodo que recibe un Oferta en formato JSON y lo agrega a la Base de Datos <br/>
+	 * Metodo que recibe un Alojamiento en formato JSON y lo agrega a la Base de Datos <br/>
 	 * <b>Precondicion: </b> El archivo <em>'conectionData'</em> ha sido inicializado con las credenciales del usuario <br/>
-	 * <b>Postcondicion: </b> Se actualiza la Base de datos con la informacion correspondiente al Oferta.<br/>
-	 * @param Oferta JSON con la informacion del Oferta que se desea agregar
-	 * @return	<b>Response Status 200</b> - JSON que contiene al Oferta que se desea modificar <br/>
+	 * <b>Postcondicion: </b> Se actualiza la Base de datos con la informacion correspondiente al Alojamiento.<br/>
+	 * @param Alojamiento JSON con la informacion del Alojamiento que se desea agregar
+	 * @return	<b>Response Status 200</b> - JSON que contiene al Alojamiento que se desea modificar <br/>
 	 * 			<b>Response Status 500</b> - Excepcion durante el transcurso de la transaccion
 	 */
 	@PUT	
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response retirarOferta(Oferta Oferta) {
+	public Response retirarOfertaAlojamiento(Oferta Alojamiento) {
 		try{
 			TransactionManager tm = new TransactionManager( getPath( ) );
 			
-			tm.retirarOferta(Oferta);
-			return getOfertaById(Oferta.getId());			
+			tm.retirarOferta(Alojamiento);
+			return getOfertaById(Alojamiento.getId());			
 		}
 		catch( Exception e )
 		{
 			return Response.status( 500 ).entity( doErrorMessage( e ) ).build( );
 		}
 	}
+	/**
+	 * Metodo que recibe un Alojamiento en formato JSON y lo agrega a la Base de Datos <br/>
+	 * <b>Precondicion: </b> El archivo <em>'conectionData'</em> ha sido inicializado con las credenciales del usuario <br/>
+	 * <b>Postcondicion: </b> Se actualiza la Base de datos con la informacion correspondiente al Alojamiento.<br/>
+	 * @param Alojamiento JSON con la informacion del Alojamiento que se desea agregar
+	 * @return	<b>Response Status 200</b> - JSON que contiene al Alojamiento que se desea modificar <br/>
+	 * 			<b>Response Status 500</b> - Excepcion durante el transcurso de la transaccion
+	 */
+	@PUT	
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("deshabilitar")
+	public Response deshabilitarOferta(Oferta Alojamiento) {
+		try{
+			TransactionManager tm = new TransactionManager( getPath( ) );
+			
+			Documentacion x = tm.deshabilitarOferta(Alojamiento);
+			return Response.status( 200 ).entity( x ).build( );			
+		}
+		catch( Exception e )
+		{
+			return Response.status( 500 ).entity( doErrorMessage( e ) ).build( );
+		}
+	}
+	/**
+	 * Metodo que recibe un Alojamiento en formato JSON y lo agrega a la Base de Datos <br/>
+	 * <b>Precondicion: </b> El archivo <em>'conectionData'</em> ha sido inicializado con las credenciales del usuario <br/>
+	 * <b>Postcondicion: </b> Se actualiza la Base de datos con la informacion correspondiente al Alojamiento.<br/>
+	 * @param Alojamiento JSON con la informacion del Alojamiento que se desea agregar
+	 * @return	<b>Response Status 200</b> - JSON que contiene al Alojamiento que se desea modificar <br/>
+	 * 			<b>Response Status 500</b> - Excepcion durante el transcurso de la transaccion
+	 */
+	@PUT	
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("habilitar")
+	public Response habilitarOferta(Oferta Alojamiento) {
+		try{
+			TransactionManager tm = new TransactionManager( getPath( ) );
+			
+			Documentacion x = tm.habilitarOferta(Alojamiento);
+			return Response.status( 200 ).entity( x ).build( );			
+		}
+		catch( Exception e )
+		{
+			return Response.status( 500 ).entity( doErrorMessage( e ) ).build( );
+		}
+	}
+	
+	/**
+	 * Metodo GET que trae a todos los Alojamientos top en la Base de datos. <br/>
+	 * <b>Precondicion: </b> el archivo <em>'conectionData'</em> ha sido inicializado con las credenciales del usuario <br/>
+	 * <b>URL: </b> http://localhost:8080/AlohAndes/rest/Alojamientos <br/>
+	 * @return	<b>Response Status 200</b> - JSON que contiene a todos los Alojamientos que estan en la Base de Datos <br/>
+	 * 			<b>Response Status 500</b> - Excepcion durante el transcurso de la transaccion
+	 */			
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON })
+	@Path("ofertasmaspopulares")
+	public Response getAlojamientosPopulares() {
+		
+		try {
+			TransactionManager tm = new TransactionManager(getPath());
+			
+			List<MejoresOfertas> Alojamientos;
+			Alojamientos = tm.getAlojamientosMasPopulares();
+			return Response.status(200).entity(Alojamientos).build();
+		} 
+		catch (Exception e) {
+			return Response.status(500).entity(doErrorMessage(e)).build();
+		}
+	}
+	/**
+	 * Metodo GET que trae a todos los Alojamientos top en la Base de datos. <br/>
+	 * <b>Precondicion: </b> el archivo <em>'conectionData'</em> ha sido inicializado con las credenciales del usuario <br/>
+	 * <b>URL: </b> http://localhost:8080/AlohAndes/rest/Alojamientos <br/>
+	 * @return	<b>Response Status 200</b> - JSON que contiene a todos los Alojamientos que estan en la Base de Datos <br/>
+	 * 			<b>Response Status 500</b> - Excepcion durante el transcurso de la transaccion
+	 */			
+	@PUT
+	@Produces({ MediaType.APPLICATION_JSON })
+	@Path("conrestricciones")
+	public Response getAlojamientosConRestricciones(Condicion pCondiciones) {
+		
+		try {
+			TransactionManager tm = new TransactionManager(getPath());
+			
+			List<Oferta> Alojamientos;
+			Alojamientos = tm.getAlojamientosConRestriccion(pCondiciones);
+			return Response.status(200).entity(Alojamientos).build();
+		} 
+		catch (Exception e) {
+			return Response.status(500).entity(doErrorMessage(e)).build();
+		}
+	}
+	
+	
+	/**
+	 * Metodo GET que trae un informe que detalla los dias de pico(ocuapcion y recaudacion). <br/>
+	 * <b>Precondicion: </b> el archivo <em>'conectionData'</em> ha sido inicializado con las credenciales del usuario <br/>
+	 * <b>URL: </b> http://localhost:8080/AlohAndes/rest/Alojamientos <br/>
+	 * @return	<b>Response Status 200</b> - JSON que contiene a todos los Alojamientos que estan en la Base de Datos <br/>
+	 * 			<b>Response Status 500</b> - Excepcion durante el transcurso de la transaccion
+	 */			
+	@PUT
+	@Produces({ MediaType.APPLICATION_JSON })
+	@Path("diaspico")
+	public Response getDiasPico(Condicionn pCondiciones) {
+		
+		try {
+			TransactionManager tm = new TransactionManager(getPath());
+			
+		  Documentacion x=tm.getDiasPico(pCondiciones);
+	   return Response.status(200).entity(x).build();
+		} 
+		catch (Exception e) {
+			return Response.status(500).entity(doErrorMessage(e)).build();
+		}
+	}
+	
+	
+	
 }

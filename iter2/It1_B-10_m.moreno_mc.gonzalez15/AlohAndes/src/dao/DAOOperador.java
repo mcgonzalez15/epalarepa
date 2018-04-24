@@ -4,7 +4,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import vos.*;
 
@@ -174,6 +178,95 @@ public class DAOOperador {
 		
 
 	}
+	
+	
+	/**
+	 * Metodo por el que se obtienen las ganancias de un operador en el año actual<br/>
+	 * <b>Precondicion: </b> la conexion a sido inicializadoa <br/>  
+	 * @throws SQLException SQLException Genera excepcion si hay error en la conexion o en la consulta SQL
+	 * @throws Exception Si se genera un error dentro del metodo.
+	 */
+	public List<OperadorGanancia> getGananciasActualesOperadores() throws SQLException, Exception {
+
+		Date date1 = new Date();
+		int anhoActual = date1.getYear()+1900;
+		String sql2 = "SELECT OPE.ID,OPE.NOMBRE, SUM(RE.PRECIO_TOTAL) AS GANANCIA FROM "+USUARIO +".RESERVAS RE INNER JOIN "+USUARIO +".OFERTAS ALO ON ALO.ID=RE.ID_OFERTA INNER JOIN " +USUARIO+ ".OPERADORES OPE ON  ALO.ID_OPERADOR=OPE.ID WHERE RE.FECHA_FIN BETWEEN '01/01/"+anhoActual+"' AND '31/12/"+anhoActual+"' AND  RE.TERMINADA='T' GROUP BY OPE.ID, OPE.NOMBRE";
+		
+		System.out.println(sql2);
+		
+		PreparedStatement prepStmt2 = conn.prepareStatement(sql2);
+		recursos.add(prepStmt2);
+		ResultSet rs = prepStmt2.executeQuery();
+		
+		ArrayList<OperadorGanancia> lista = new ArrayList<>();
+		
+		while(rs.next()) {
+			String id = rs.getString("ID");
+			String nombre = rs.getString("NOMBRE");
+			String ganancia = rs.getString("GANANCIA");
+			OperadorGanancia actual = new OperadorGanancia(id, nombre, ganancia);
+			lista.add(actual);
+		}
+		return lista;
+	}
+	
+	/**
+	 * Metodo por el que se obtienen las ganancias de un operador en el año actual<br/>
+	 * <b>Precondicion: </b> la conexion a sido inicializadoa <br/>  
+	 * @throws SQLException SQLException Genera excepcion si hay error en la conexion o en la consulta SQL
+	 * @throws Exception Si se genera un error dentro del metodo.
+	 */
+	public List<OperadorGanancia> getGananciasPasadasOperadores() throws SQLException, Exception {
+
+		Date date1 = new Date();
+		int anhoActual = date1.getYear()+1900;
+		String sql2 = "SELECT OPE.ID,OPE.NOMBRE, SUM(RE.PRECIO_TOTAL) AS GANANCIA FROM "+USUARIO +".RESERVAS RE INNER JOIN "+USUARIO +".OFERTAS ALO ON ALO.ID=RE.ID_OFERTA INNER JOIN " +USUARIO+ ".OPERADORES OPE ON  ALO.ID_OPERADOR=OPE.ID WHERE RE.FECHA_FIN BETWEEN '01/01/"+(anhoActual-1)+"' AND '31/12/"+(anhoActual-1)+"' AND  RE.TERMINADA='T' GROUP BY OPE.ID, OPE.NOMBRE";
+		System.out.println(sql2);
+		
+		PreparedStatement prepStmt2 = conn.prepareStatement(sql2);
+		recursos.add(prepStmt2);
+		ResultSet rs = prepStmt2.executeQuery();
+		
+		ArrayList<OperadorGanancia> lista = new ArrayList<>();
+		
+		while(rs.next()) {
+			String id = rs.getString("ID");
+			String nombre = rs.getString("NOMBRE");
+			String ganancia = rs.getString("GANANCIA");
+			OperadorGanancia actual = new OperadorGanancia(id, nombre, ganancia);
+			lista.add(actual);
+		}
+		return lista;
+	}
+	/**
+	 * Metodo por el que se obtienen los indices de ocupacion de varios alojamientos<br/>
+	 * <b>Precondicion: </b> la conexion a sido inicializadoa <br/>  
+	 * @throws SQLException SQLException Genera excepcion si hay error en la conexion o en la consulta SQL
+	 * @throws Exception Si se genera un error dentro del metodo.
+	 */
+	public List<IndiceOcupacion> getIndicesOcupacion() throws SQLException, Exception {
+
+		DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+		Date date1 = new Date();
+		String x = dateFormat.format(date1);
+		String sql2 = "SELECT OPE.ID, OPE.NOMBRE, SUM(RE.NUM_PERSONAS)/SUM(ALO.CAPACIDAD) AS PORCENTAJE_OCUPACION FROM ISIS2304A431810.OPERADORES OPE INNER JOIN ISIS2304A431810.OFERTAS ALO ON OPE.ID=ALO.ID_OPERADOR INNER JOIN ISIS2304A431810.RESERVAS RE ON RE.ID_OFERTA= ALO.ID WHERE RE.CANCELADA='F' AND '"+x+"' BETWEEN RE.FECHA_INICIO AND RE.FECHA_FIN GROUP BY OPE.ID,OPE.NOMBRE";
+		System.out.println(sql2);
+		
+		PreparedStatement prepStmt2 = conn.prepareStatement(sql2);
+		recursos.add(prepStmt2);
+		ResultSet rs = prepStmt2.executeQuery();
+		
+		ArrayList<IndiceOcupacion> lista = new ArrayList<IndiceOcupacion>();
+		
+		while(rs.next()) {
+			String id = rs.getString("ID");
+			String nombre = rs.getString("NOMBRE");
+			String ganancia = rs.getString("PORCENTAJE_OCUPACION");
+			IndiceOcupacion actual = new IndiceOcupacion(id, nombre, ganancia);
+			lista.add(actual);
+		}
+		return lista;
+	}
 
 	//----------------------------------------------------------------------------------------------------------------------------------
 	// METODOS AUXILIARES
@@ -267,4 +360,5 @@ public class DAOOperador {
 
 		return ope;
 	}
+
 }

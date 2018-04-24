@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import vos.*;
 import vos.Oferta.tipoAlojamiento;
@@ -520,7 +521,7 @@ public class DAOOferta {
 	 * @throws SQLException SQLException Genera excepcion si hay error en la conexion o en la consulta SQL
 	 * @throws Exception Si se genera un error dentro del metodo.
 	 */
-	public Documentacion deshabilitarOfertaAlojamiento(Oferta alojamiento, DAOReserva daoReserva, DAOCliente daoCliente) throws SQLException, Exception {
+	public Documentacion deshabilitarOferta(Oferta alojamiento, DAOReserva daoReserva, DAOCliente daoCliente) throws SQLException, Exception {
 
 		DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 		Date datex = new Date();
@@ -608,7 +609,7 @@ public class DAOOferta {
 		}
 
 		StringBuilder sql = new StringBuilder();
-		sql.append(String.format("UPDATE %s.ALOJAMIENTOS SET ", USUARIO));
+		sql.append(String.format("UPDATE %s.OFERTAS SET ", USUARIO));
 		sql.append("VIGENTE = 'F' ");
 		sql.append(String.format(" WHERE ID = %d ", alojamiento.getId()));
 		System.out.println(sql);
@@ -618,7 +619,7 @@ public class DAOOferta {
 		String y = "Se ha deshabilitado el alojamiento: " +alojamiento.getId();
 		informe.add(y);
 		
-		String sql6 = "UPDATE " +USUARIO +".RESERVAS SET CANCELADA = 'T' , FECHA_CANCELACION = '"+xm+"' WHERE ID_ALOJAMIENTO = "+alojamiento.getId();
+		String sql6 = "UPDATE " +USUARIO +".RESERVAS SET CANCELADA = 'T' , FECHA_CANCELACION = '"+xm+"' WHERE ID_OFERTA = "+alojamiento.getId();
 		System.out.println(sql6);
 		PreparedStatement prepStmt6 = conn.prepareStatement(sql6);
 		recursos.add(prepStmt6);
@@ -635,7 +636,7 @@ public class DAOOferta {
 	 * @throws SQLException SQLException Genera excepcion si hay error en la conexion o en la consulta SQL
 	 * @throws Exception Si se genera un error dentro del metodo.
 	 */
-	public Documentacion habilitarOfertaAlojamiento(Oferta alojamiento) throws SQLException, Exception {
+	public Documentacion habilitarOferta(Oferta alojamiento) throws SQLException, Exception {
 
 		StringBuilder sql = new StringBuilder();
 		sql.append(String.format("UPDATE %s.ALOJAMIENTOS SET ", USUARIO));
@@ -650,6 +651,200 @@ public class DAOOferta {
 		noMasSistrans.add(i);
 		Documentacion d = new Documentacion(noMasSistrans);
 		return d;
+	}
+	
+	
+	
+	
+	/**
+	 * Metodo que obtiene la informacion de todos los Alojamientos mas populares en la base de datos <br/>
+	 * <b>Precondicion: </b> la conexion a sido inicializadoa <br/>
+	 * @return	lista con la informacion de todos los Alojamientos que se encuentran en la Base de Datos
+	 * @throws SQLException Genera excepcion si hay error en la conexion o en la consulta SQL
+	 * @throws Exception Si se genera un error dentro del metodo.
+	 */
+	public ArrayList<MejoresOfertas> getAlojamientosMasPopulares() throws SQLException, Exception {
+		ArrayList<MejoresOfertas> Alojamientos = new ArrayList<MejoresOfertas>();
+
+		String sql = "SELECT A.* FROM (SELECT ALO.ID as id_alojamiento,OPE.NOMBRE AS OPERADOR,ALO.UBICACION AS UBICACION ,COUNT(RE.ID) AS mas_reservado FROM (ISIS2304A431810.RESERVAS RE INNER JOIN ISIS2304A431810.OFERTAS ALO ON RE.ID_OFERTA=ALO.ID INNER JOIN ISIS2304A431810.OPERADORES OPE ON ALO.ID_OPERADOR=OPE.ID) GROUP BY ALO.ID,ALO.UBICACION, OPE.NOMBRE ORDER BY COUNT(RE.ID) DESC) A WHERE ROWNUM<20";
+
+		PreparedStatement prepStmt = conn.prepareStatement(sql);
+		recursos.add(prepStmt);
+		ResultSet rs = prepStmt.executeQuery();
+
+
+		while (rs.next()) {
+			String id = rs.getString("ID_ALOJAMIENTO");
+			String operador = rs.getString("OPERADOR");
+			String ubicacion = rs.getString("UBICACION");
+			String numReserva = rs.getString("MAS_RESERVADO");
+			MejoresOfertas actual = new MejoresOfertas(id, operador, ubicacion, numReserva);
+			Alojamientos.add(actual);		}
+		return Alojamientos;
+	}
+	/**
+	 * Metodo que obtiene la informacion de todos los Alojamientos con restriccion de fecha y servicios <br/>
+	 * <b>Precondicion: </b> la conexion a sido inicializadoa <br/>
+	 * @return	lista con la informacion de todos los Alojamientos que se encuentran en la Base de Datos
+	 * @throws SQLException Genera excepcion si hay error en la conexion o en la consulta SQL
+	 * @throws Exception Si se genera un error dentro del metodo.
+	 */
+	public ArrayList<Oferta> getAlojamientosConRestriccion(Condicion pCondiciones) throws SQLException, Exception {
+		ArrayList<Oferta> Alojamientos = new ArrayList<Oferta>();
+		if(pCondiciones.getFechaFin()!= null && pCondiciones!=null && pCondiciones.getServicios()!= null&& !pCondiciones.getServicios().isEmpty())
+		{
+			DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+			Date fechaInicio = pCondiciones.getFechaInicio();
+			Date fechaFin = pCondiciones.getFechaFin();
+			String x1 = dateFormat.format(fechaInicio);
+			String x2 = dateFormat.format(fechaFin);
+		   String sql = "SELECT * FROM ISIS2304A431810.OFERTAS ALO WHERE ALO.ID NOT IN ( SELECT RE.ID_OFERTA FROM  ISIS2304A431810.RESERVAS RE WHERE( RE.FECHA_INICIO  BETWEEN '"+x1+"' AND '"+x2+"')";
+			String sql2	=	" ) AND ALO.ID IN ( SELECT SEO.ID_OFERTA FROM  ISIS2304A431810.OFRECEN SEO INNER JOIN  ISIS2304A431810.SERVICIOS SE ON SE.ID=SEO.ID_SERVICIO WHERE ";
+			String sql3 = "";
+			for (int i = 1; i < pCondiciones.getServicios().size(); i++) {
+				String actual = pCondiciones.getServicios().get(i).getNombre();
+				sql3+=" SE.NOMBRE='"+actual+"'OR ";
+			}
+			String sql4 =  "SE.NOMBRE='"+pCondiciones.getServicios().get(0).getNombre()+"' )";
+			System.out.println(sql+sql2+sql3+sql4);
+			PreparedStatement prepStmt = conn.prepareStatement(sql+sql2+sql3+sql4);
+			recursos.add(prepStmt);
+			ResultSet rs = prepStmt.executeQuery();
+
+
+			while (rs.next()) {
+				Alojamientos.add(convertResultSetToOferta(rs));
+			}
+		}
+		else
+			throw new Exception("Condiciones de busqueda invalidas");
+		return Alojamientos;
+	}
+	
+	
+	
+	/**
+	 * Metodo que dado un tipo de alojamiento y un rango de fechas semana o mes dice cuales fueron las fechas de mayor y menor numero de reservas y la de mayor recaudacion
+	 * <b>Precondicion: </b> la conexion a sido inicializadoa <br/>
+	 * @return	lista con la informacion del parametro analizado y la fecha en la cual se produce ademas de su valor.
+	 * @throws SQLException Genera excepcion si hay error en la conexion o en la consulta SQL
+	 * @throws Exception Si se genera un error dentro del metodo.
+	 */
+	public Documentacion getOperacionAlohAndes(Condicionn cond) throws SQLException,Exception
+	{
+		
+		ArrayList<String> pReporte = new ArrayList<>();
+		
+		DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+		Date fechaInicio = cond.getFechaInicio();
+		Date fechaFin = cond.getFechaFin();
+		String x1 = dateFormat.format(fechaInicio);
+		String x2 = dateFormat.format(fechaFin);
+
+		long diff = fechaFin.getTime() - fechaInicio.getTime();
+		int n=(int) TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
+		System.out.println ("Days de : " + TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS));
+		String tipo=cond.getTipo().getTipo().name();
+		if(cond!=null && cond.getFechaInicio()!= null &&cond.getFechaFin()!= null && cond.getTipo()!= null)
+		{
+			String diamaxOcu=null;
+			String diaminOcu=null;
+			String diamaxRec=null;
+
+			double maxOcupacion= -1;
+			double minOcuapcion= Double.POSITIVE_INFINITY;
+			double maxRecaudacion= -1;
+			Date d1 = fechaInicio;
+
+			for(int i=0;i<n;i++)//puede cambairse este while
+			{
+
+				String xi=dateFormat.format(d1);
+				String sql=String.format("SELECT COUNT(*) AS OCUPACION  FROM RESERVAS RE INNER JOIN OFERTAS ALO ON ALO.ID=RE.ID_OFERTA WHERE "+xi+" BETWEEN RE.FECHA_INICIO AND RE.FECHA_FIN  AND RE.CANCELADA='F' AND  ALO.TIPO = %1$s",tipo);
+				System.out.println(sql);
+				PreparedStatement prepStmt = conn.prepareStatement(sql);
+				recursos.add(prepStmt);
+				ResultSet rs = prepStmt.executeQuery();
+				double ocupaciondiaactual=Integer.parseInt( rs.getString("OCUPACION"));
+				rs.close();
+				if(ocupaciondiaactual>maxOcupacion  )
+				{
+					maxOcupacion=ocupaciondiaactual;
+					diamaxRec=xi;
+				}
+				if(ocupaciondiaactual<minOcuapcion  )
+				{
+					minOcuapcion=ocupaciondiaactual;
+					diaminOcu=xi;
+				}
+
+				String sql2=String.format("SELECT SUM(COSTO_DEFINITIVO) AS TOTAL_COBRADO_POR_DIA FROM RESERVAS RE INNER JOIN OFERTAS ALO ON RE.ID_OFERTA=ALO.ID WHERE (RE.TERMINADA='T' AND RE.FECHA_FIN=" +xi+ " )OR (RE.CANCELADA='T' AND RE.FECHA_CANCELACION=" +xi +") AND  ALO.TIPO = $1$S",tipo);
+			    System.out.println(sql2);
+				PreparedStatement prepStmt2 = conn.prepareStatement(sql);
+				recursos.add(prepStmt2);
+				ResultSet rs2 = prepStmt.executeQuery();
+				double reacudodiaactual=Integer.parseInt( rs2.getString("TOTAL_COBRADO_POR_DIA"));
+				rs2.close();
+
+				if(reacudodiaactual>maxRecaudacion  )
+				{
+					maxRecaudacion=reacudodiaactual;
+					diamaxRec=xi;
+				}
+
+
+				Date d2 = new Date();
+				d2.setTime(d1.getTime() + 1 * 24 * 60 * 60 * 1000);	
+				d1=d2;
+			}
+			pReporte.add("la ocupacion maxima se da en "+diamaxOcu+"cuando hay ocupados "+maxOcupacion+" alojamientos");
+			pReporte.add("la ocupacion maxima se da en "+diaminOcu+"cuando hay ocupados "+minOcuapcion+" alojamientos");
+			pReporte.add("la ocupacion maxima se da en "+diamaxRec+"cuando hay cancelados $"+maxRecaudacion);
+		}
+	
+		Documentacion result=new Documentacion(pReporte);
+		return result;
+
+	}
+	
+	
+	/**
+	 * Metodo que obtiene la informacion de todos los Alojamientos que no tienen reservas durante 1 mes completo <br/>
+	 * <b>Precondicion: </b> la conexion a sido inicializadoa <br/>
+	 * @return	lista con la informacion de todos los Alojamientos que se no fueron usados durante 1 mes o mas
+	 * @throws SQLException Genera excepcion si hay error en la conexion o en la consulta SQL
+	 * @throws Exception Si se genera un error dentro del metodo.
+	 */
+	public ArrayList<Oferta> getAlojamientosDesiertos(Condicion pCondiciones) throws SQLException, Exception {
+		ArrayList<Oferta> Alojamientos = new ArrayList<Oferta>();
+		if(pCondiciones.getFechaFin()!= null && pCondiciones!=null && pCondiciones.getServicios()!= null&& !pCondiciones.getServicios().isEmpty())
+		{
+			DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+			Date fechaInicio = pCondiciones.getFechaInicio();
+			Date fechaFin = pCondiciones.getFechaFin();
+			String x1 = dateFormat.format(fechaInicio);
+			String x2 = dateFormat.format(fechaFin);
+		   String sql = "SELECT * FROM ISIS2304A431810.OFERTAS ALO WHERE ALO.ID NOT IN ( SELECT RE.ID_OFERTA FROM  ISIS2304A431810.RESERVAS RE WHERE( RE.FECHA_INICIO  BETWEEN '"+x1+"' AND '"+x2+"')";
+			String sql2	=	" ) AND ALO.ID IN ( SELECT SEO.ID_OFERTA FROM  ISIS2304A431810.OFRECEN SEO INNER JOIN  ISIS2304A431810.SERVICIOS SE ON SE.ID=SEO.ID_SERVICIO WHERE ";
+			String sql3 = "";
+			for (int i = 1; i < pCondiciones.getServicios().size(); i++) {
+				String actual = pCondiciones.getServicios().get(i).getNombre();
+				sql3+=" SE.NOMBRE='"+actual+"'OR ";
+			}
+			String sql4 =  "SE.NOMBRE='"+pCondiciones.getServicios().get(0).getNombre()+"' )";
+			System.out.println(sql+sql2+sql3+sql4);
+			PreparedStatement prepStmt = conn.prepareStatement(sql+sql2+sql3+sql4);
+			recursos.add(prepStmt);
+			ResultSet rs = prepStmt.executeQuery();
+
+
+			while (rs.next()) {
+				Alojamientos.add(convertResultSetToOferta(rs));
+			}
+		}
+		else
+			throw new Exception("Condiciones de busqueda invalidas");
+		return Alojamientos;
 	}
 	
 	//----------------------------------------------------------------------------------------------------------------------------------

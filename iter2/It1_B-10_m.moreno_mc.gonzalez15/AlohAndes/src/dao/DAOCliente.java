@@ -143,10 +143,7 @@ public class DAOCliente {
 		sql.append(String.format("NOMBRE = '%1$s' , CORREO = '%2$s'", Cliente.getNombre(), Cliente.getCorreo()));
 		sql.append(String.format(" WHERE ID = %d ", Cliente.getId()));
 		System.out.println(sql);
-		// Falta Actualizar los ofertas del Cliente
-		//Falta Agregar todos los contratos
-		//Falta agregar todos los servicios
-		//Falta agregar todas las reservas
+		
 		PreparedStatement prepStmt = conn.prepareStatement(sql.toString());
 		recursos.add(prepStmt);
 		prepStmt.executeQuery();
@@ -169,13 +166,114 @@ public class DAOCliente {
 		recursos.add(prepStmt2);
 		prepStmt2.executeQuery();
 
-
-		//Revisar Cascade de los ofertas
-		//Falta revisar cascade todos los contratos
-		//Falta revisar cascade todos los servicios
-		//Falta revisar cascade todas las reservas
 	}
 
+	
+	/**
+	 * Metodo que obtiene la informacion de todos los Clientes fieles para un alojamiento dado <br/>
+	 * <b>Precondicion: </b> la conexion a sido inicializadoa <br/>
+	 * @param id del alojamiento para el cual se hace el analisis
+	 * @return	lista con la informacion de todos los Clientes que han reservado mas de 15 noches o en 3 ocasiones un alojamiento
+	 * @throws SQLException Genera excepcion si hay error en la conexion o en la consulta SQL
+	 * @throws Exception Si se genera un error dentro del metodo.
+	 */
+	public Documentacion getClientesFieles(Long  id)    throws SQLException,Exception
+	{
+		ArrayList<String> clientes = new ArrayList<String>();
+		
+
+	String sql=String.format("SELECT RES.ID_OFERTA,RES.ID_CLIENTE,CLI.NOMBRE,CLI.CORREO,COUNT(*) AS NUMERO_OCASIONES,SUM(TRUNC(RES.FECHA_FIN)-TRUNC(RES.FECHA_INICIO))   AS NUM_NOCHES");
+	String sql2=String.format(	" FROM RESERVAS RES INNER JOIN CLIENTES CLI ON CLI.ID=RES.ID_CLIENTE WHERE RES.ID_OFERTA = %1$d AND RES.CANCELADA='F' ",id);
+	String sql3=String.format(" GROUP BY RES.ID_CLIENTE, RES.ID_OFERTA,CLI.NOMBRE,CLI.CORREO HAVING COUNT(*)>=3 OR SUM(TRUNC(RES.FECHA_FIN)-TRUNC(RES.FECHA_INICIO)) >=15");
+	
+		System.out.println(sql+sql2+sql3);
+		PreparedStatement prepStmt = conn.prepareStatement(sql+sql2+sql3);
+		recursos.add(prepStmt);
+		ResultSet rs = prepStmt.executeQuery();
+		String z = "No existen cliente fieles";
+		boolean entro = false;
+		while (rs.next()) {
+			entro = true;
+			String idAlojamiento = rs.getString("ID_ALOJAMIENTO");
+			String idCliente = rs.getString("ID_CLIENTE");
+			String nombre = rs.getString("NOMBRE");
+			String contacto = rs.getString("CORREO");
+			String numOcasiones = rs.getString("NUMERO_OCASIONES");
+			String numNoches = rs.getString("NUM_NOCHES");
+			String y = "El Alojamiento con id: "+ idAlojamiento+" tiene un cliente fiel, identificado con id: "+ idCliente+", con nombre: " + nombre+" y correo: "+contacto+". Ha visitado el alojamiento en: "+numOcasiones+" ocasiones y se ha hospedado un total de: "+numNoches+" noches";
+			clientes.add(y);
+		}
+		if(!entro)
+		{
+			clientes.add(z);
+		}
+		Documentacion x = new Documentacion(clientes);
+		return x;
+		
+		
+	}
+	
+	/////// CUIDADO WARNING WARNING/////////////
+	
+	/**
+	 * Metodo que obtiene la informacion de todo el uso de alohandes en la Base de Datos <br/>
+	 * <b>Precondicion: </b> la conexion a sido inicializadoa <br/>
+	 * @return	lista con la informacion de todos los Clientes que se encuentran en la Base de Datos
+	 * @throws SQLException Genera excepcion si hay error en la conexion o en la consulta SQL
+	 * @throws Exception Si se genera un error dentro del metodo.
+	 */
+	public ArrayList<UtilizacionAloh> getUsoAlohAndes() throws SQLException, Exception {
+		ArrayList<UtilizacionAloh> clientes = new ArrayList<UtilizacionAloh>();
+// WARNING EN ESTA SENTENCIA SQL USA LA TABLA RELACION QUE NOSOTRAS NO TENEMOS////////
+		String sql = "SELECT RELA.TIPO,ALO.TIPO AS TIPO_ALOJAMIENTO,SUM(RE.PRECIO_TOTAL) AS DINERO_PAGADO,SUM(RE.NUM_DIAS) AS DIAS_CONTRATADOS FROM "+USUARIO+".CLIENTES CLI INNER JOIN "+USUARIO+".RESERVAS RE ON RE.ID_CLIENTE=CLI.ID INNER JOIN "+USUARIO+".OFERTAS ALO ON ALO.ID=RE.ID_OFERTA INNER JOIN "+USUARIO+".RELACIONES RELA ON RELA.ID=CLI.ID_RELACION GROUP BY RELA.TIPO,ALO.TIPO";
+
+		PreparedStatement prepStmt = conn.prepareStatement(sql);
+		recursos.add(prepStmt);
+		ResultSet rs = prepStmt.executeQuery();
+
+		while (rs.next()) {
+			String tipoUsuario = rs.getString("tipo");
+			String tipoAlojamiento = rs.getString("TIPO_ALOJAMIENTO");
+			String dineroPagado = rs.getString("DINERO_PAGADO");
+			String dias = rs.getString("DIAS_CONTRATADOS");
+			UtilizacionAloh actual = new UtilizacionAloh(tipoUsuario, tipoAlojamiento, dineroPagado, dias);
+			clientes.add(actual);
+		}
+		return clientes;
+	}
+	
+	/**
+	 * Metodo que obtiene las estadisticas del cliente enviado por parametro<br/>
+	 * <b>Precondicion: </b> la conexion a sido inicializadoa <br/> 
+	 * @param id el identificador del Cliente
+	 * @return la informacion del Cliente que cumple con los criterios de la sentecia SQL
+	 * 			Null si no existe el bebedor conlos criterios establecidos
+	 * @throws SQLException SQLException Genera excepcion si hay error en la conexion o en la consulta SQL
+	 * @throws Exception Si se genera un error dentro del metodo.
+	 */
+	public EstadisticasCliente getEstadisticasCliente(Cliente cliente1) throws SQLException, Exception 
+	{
+		EstadisticasCliente cliente = null;
+
+		String sql = "SELECT CLI.ID,  CLI.NOMBRE,ALO.TIPO AS TIPO_ALOJAMIENTO,SUM(RE.PRECIO_TOTAL) AS DINERO_PAGADO,SUM(RE.NUM_DIAS) AS DIAS_CONTRATADOS FROM ISIS2304A431810.CLIENTES CLI INNER JOIN  ISIS2304A431810.RESERVAS RE ON RE.ID_CLIENTE=CLI.ID INNER JOIN ISIS2304A431810.OFERTAS ALO ON ALO.ID=RE.ID_OFERTA WHERE CLI.NOMBRE='"+cliente1.getNombre()+"' GROUP BY CLI.NOMBRE,CLI.ID,ALO.TIPO"; 
+
+		PreparedStatement prepStmt = conn.prepareStatement(sql);
+		recursos.add(prepStmt);
+		ResultSet rs = prepStmt.executeQuery();
+
+		if(rs.next()) {
+			String id = rs.getString("ID");
+			String nombre = rs.getString("NOMBRE");
+			String tipo = rs.getString("TIPO_ALOJAMIENTO");
+			String dinero = rs.getString("DINERO_PAGADO");
+			String dias = rs.getString("DIAS_CONTRATADOS");
+			cliente = new EstadisticasCliente(id,nombre,tipo,dinero,dias);
+		}
+
+		return cliente;
+	}
+	
+	
 	
 	
 	
