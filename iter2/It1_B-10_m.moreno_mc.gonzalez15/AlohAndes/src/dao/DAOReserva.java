@@ -426,7 +426,7 @@ public class DAOReserva {
 		boolean colectiva = false;
 		if(resultSet.getString("COLECTIVA").equals("T"))
 			colectiva = true;
-		long idAlojamiento = Long.parseLong(resultSet.getString("ID_ALOJAMIENTO"));
+		long idAlojamiento = Long.parseLong(resultSet.getString("ID_OFERTA"));
 		long idCliente = Long.parseLong(resultSet.getString("ID_CLIENTE"));
 		Oferta alojamiento = daoAlojamiento.findOfertaById(idAlojamiento);
 		Cliente cliente = daoCliente.findClienteById(idCliente);

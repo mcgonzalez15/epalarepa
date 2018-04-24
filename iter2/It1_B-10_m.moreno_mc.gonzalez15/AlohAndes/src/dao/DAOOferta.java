@@ -674,7 +674,7 @@ public class DAOOferta {
 
 
 		while (rs.next()) {
-			String id = rs.getString("ID_ALOJAMIENTO");
+			String id = rs.getString("ID_OFERTA");
 			String operador = rs.getString("OPERADOR");
 			String ubicacion = rs.getString("UBICACION");
 			String numReserva = rs.getString("MAS_RESERVADO");

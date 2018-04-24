@@ -194,7 +194,7 @@ public class DAOCliente {
 		boolean entro = false;
 		while (rs.next()) {
 			entro = true;
-			String idAlojamiento = rs.getString("ID_ALOJAMIENTO");
+			String idAlojamiento = rs.getString("ID_OFERTA");
 			String idCliente = rs.getString("ID_CLIENTE");
 			String nombre = rs.getString("NOMBRE");
 			String contacto = rs.getString("CORREO");
