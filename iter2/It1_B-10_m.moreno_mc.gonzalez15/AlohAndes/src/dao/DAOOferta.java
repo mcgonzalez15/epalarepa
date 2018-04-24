@@ -237,8 +237,7 @@ public class DAOOferta {
 	 * @throws Exception Si se genera un error dentro del metodo.
 	 */
 	public void addHostal (Hostal Hostal) throws SQLException, Exception {
-		// Se asume que el operador ya existe.
-		// El Hostal empieza sin reservas.
+
 		String var = "F";
 		if(Hostal.isDisponible())
 			var = "T";
@@ -308,8 +307,7 @@ public class DAOOferta {
 	 * @throws Exception Si se genera un error dentro del metodo.
 	 */
 	public void addHotel (Hotel Hotel) throws SQLException, Exception {
-		// Se asume que el operador ya existe.
-		// El Hotel empieza sin reservas.
+
 		String var = "F";
 		if(Hotel.isDisponible())
 			var = "T";
@@ -362,27 +360,27 @@ public class DAOOferta {
 		
 	}
 	/**
-	 * Metodo que agregar la informacion de un nuevo habUniversitaria en la Base de Datos a partir del parametro ingresado<br/>
+	 * Metodo que agregar la informacion de una nueva vivienda universitaria en la Base de Datos a partir del parametro ingresado<br/>
 	 * <b>Precondicion: </b> la conexion a sido inicializadoa <br/>  
-	 * @param habUniversitaria habUniversitaria que desea agregar a la Base de Datos
+	 * @param vivUniversitaria vivUniversitaria que desea agregar a la Base de Datos
 	 * @throws SQLException SQLException Genera excepcion si hay error en la conexion o en la consulta SQL
 	 * @throws Exception Si se genera un error dentro del metodo.
 	 */
-	public void addViviendaUniversitaria (ViviendaUniversitaria habUniversitaria) throws SQLException, Exception {
+	public void addViviendaUniversitaria (ViviendaUniversitaria vivUniversitaria) throws SQLException, Exception {
 		String var = "F";
-		if(habUniversitaria.isDisponible())
+		if(vivUniversitaria.isDisponible())
 			var = "T";
 
 		String sql2 = "INSERT INTO "+ USUARIO+".OFERTAS (ID, UBICACION, PRECIO, CAPACIDAD, DISPONIBLE, FECHA_RETIRO, TIPO , ID_OPERADOR) VALUES ("+ 
 
-				habUniversitaria.getId()+", '"+
-				habUniversitaria.getUbicacion()+"' ,"+
-				habUniversitaria.getPrecio()+","+
-				habUniversitaria.getCapacidad()+", '"+
+				vivUniversitaria.getId()+", '"+
+				vivUniversitaria.getUbicacion()+"' ,"+
+				vivUniversitaria.getPrecio()+","+
+				vivUniversitaria.getCapacidad()+", '"+
 				var+"' , '"+
 				null+"' , '"+
-				habUniversitaria.getTipo()+"' ,"+
-				habUniversitaria.getOperador().getId()+")";
+				vivUniversitaria.getTipo()+"' ,"+
+				vivUniversitaria.getOperador().getId()+")";
 		System.out.println(sql2);
 		PreparedStatement prepStmt2 = conn.prepareStatement(sql2);
 		recursos.add(prepStmt2);
@@ -391,15 +389,13 @@ public class DAOOferta {
 		String var2 = "T";
 		String sql3 = "INSERT INTO "+ USUARIO+".VIVIENDA_UNIVERSITARIA (ID, NUM_NOCHES, INDIVIDUAL ) VALUES ("+ 
 
-				habUniversitaria.getId()+", "+
-				habUniversitaria.getNumNoches()+" , '"+
+				vivUniversitaria.getId()+", "+
+				vivUniversitaria.getNumNoches()+" , '"+
 				var2+"' )";
 		PreparedStatement prepStmt3 = conn.prepareStatement(sql3);
 		recursos.add(prepStmt3);
 		prepStmt3.executeQuery();
 
-		//Falta agregar todos los servicios.
-		//Falta agregar todos los contratos.
 	}
 	/**
 	 * Metodo que agregar la informacion de un nuevo Habitacion en la Base de Datos a partir del parametro ingresado<br/>
@@ -409,8 +405,7 @@ public class DAOOferta {
 	 * @throws Exception Si se genera un error dentro del metodo.
 	 */
 	public void addHabitacion (Habitacion Habitacion) throws SQLException, Exception {
-		// Se asume que el operador ya existe.
-		// El Habitacion empieza sin reservas.
+
 		String var = "F";
 		if(Habitacion.isDisponible())
 			var = "T";
@@ -529,7 +524,7 @@ public class DAOOferta {
 		
 		ArrayList<String> informe = new ArrayList<>();
 		// Selecciona todo de RESERVAS ordenado por fecha de inicio donde el id es de la oferta dada y esta vigente
-		String sentencia ="SELECT * FROM  " +USUARIO +".RESERVAS RE WHERE RE.ID_OFERTA = "+alojamiento.getId()+" AND CANCELADA = 'F' AND TERMINADA = 'F' ORDER BY RE.FECHA_INICIO";
+		String sentencia ="SELECT * FROM  " +USUARIO +".RESERVAS res WHERE res.ID_OFERTA = "+alojamiento.getId()+" AND CANCELADA = 'F' AND TERMINADA = 'F' ORDER BY RE.FECHA_INICIO";
 		System.out.println(sentencia);
 		PreparedStatement prepStmt2 = conn.prepareStatement(sentencia);
 		recursos.add(prepStmt2);
@@ -559,8 +554,7 @@ public class DAOOferta {
 			System.out.println( "El dia es: "+ dia2 +"El mes es: "+ mes2 +"El anho es: "+anho2);
 			String date22= "'"+dateFormat.format(date2)+"'";
 			
-			// seleccionar todo de ofertas donde el id de ofertas no este en ( id oferta de reserva  donde la fecha de inicio de la reserca este entre las dadas o que la fecga fin entre las dadas o que la fecha de inicio sea mejor a la dada y a fecha fin mayor a la 2)
-			String sql3 = "SELECT * FROM "+USUARIO+".OFERTAS ALO WHERE ROWNUM < 2 AND ALO.ID NOT IN ( SELECT RE.ID_OFERTA FROM  "+USUARIO+".RESERVAS RE WHERE( RE.FECHA_INICIO  BETWEEN "+date11+" AND "+date22+") OR  ( RE.FECHA_FIN  BETWEEN "+date11+" AND "+date22+") OR (  RE.FECHA_INICIO < "+date11+"  AND   RE.FECHA_FIN >  "+date22+") )";
+			String sql3 = "SELECT * FROM "+USUARIO+".OFERTAS ofe WHERE ROWNUM < 2 AND ofe.ID NOT IN ( SELECT res.ID_OFERTA FROM  "+USUARIO+".RESERVAS res WHERE( res.FECHA_INICIO BETWEEN "+date11+" AND "+date22+") OR  ( res.FECHA_FIN  BETWEEN "+date11+" AND "+date22+") OR (  RE.FECHA_INICIO < "+date11+"  AND   RE.FECHA_FIN >  "+date22+") )";
 			System.out.println(sql3);
 			PreparedStatement prepStmt3 = conn.prepareStatement(sql3);
 			recursos.add(prepStmt3);
@@ -594,14 +588,14 @@ public class DAOOferta {
 				ArrayList<Servicio> servicios = new ArrayList<>();
 				Reserva ope = new Reserva(idReserva+2, date1, date2, false , numPer , null, actual.getPrecio(), false, date3, actual,false , Long.parseLong("0"),  cliente, servicios);
 				daoReserva.addReserva(ope);
-				String x = "La reserva No."+idReservaActual+" ha sido asignada al alojamiento con id "+actual.getId()+" con ubicacion "+actual.getUbicacion()+" con un nuevo id "+idReserva+1 +" debido a inconvenientes con el alojamiento " +alojamiento.getId()+ " quien se encuentra deshabilitado temporalmente";
+				String x = "La reserva No."+idReservaActual+" ha sido asignada al alojamiento con id "+actual.getId()+" con ubicacion "+actual.getUbicacion()+" con un nuevo id "+idReserva+10 +", el alojamiento " +alojamiento.getId()+ " se encuentra deshabilitado temporalmente";
 				informe.add(x);
 				prepStmt4.close();
 				
 			}
 			else
 			{
-				String zx = "La reserva con id: "+ idReservaActual +" fue cancelada debido a inconvenitentes con el alojamiento y no se encontro una oferta disponible en las fechas";
+				String zx = "La reserva con id: "+ idReservaActual +" fue cancelada y no hay ofertas disponibles en las fechas";
 				informe.add(zx);
 			}
 			prepStmt3.close();
@@ -639,17 +633,17 @@ public class DAOOferta {
 	public Documentacion habilitarOferta(Oferta alojamiento) throws SQLException, Exception {
 
 		StringBuilder sql = new StringBuilder();
-		sql.append(String.format("UPDATE %s.ALOJAMIENTOS SET ", USUARIO));
+		sql.append(String.format("UPDATE %s.OFERTAS SET ", USUARIO));
 		sql.append("VIGENTE = 'T' ");
 		sql.append(String.format(" WHERE ID = %d ", alojamiento.getId()));
 		System.out.println(sql);
 		PreparedStatement prepStmt = conn.prepareStatement(sql.toString());
 		recursos.add(prepStmt);
 		prepStmt.executeQuery();
-		ArrayList<String> noMasSistrans = new ArrayList<>();
-		String i = "Se ha habilitado la oferta de alojamiento identificada con id: "+alojamiento.getId();
-		noMasSistrans.add(i);
-		Documentacion d = new Documentacion(noMasSistrans);
+		ArrayList<String> aiudaaaa = new ArrayList<>();
+		String i = "Se ha habilitado la oferta de alojamiento con id: "+alojamiento.getId();
+		aiudaaaa.add(i);
+		Documentacion d = new Documentacion(aiudaaaa);
 		return d;
 	}
 	
@@ -657,16 +651,16 @@ public class DAOOferta {
 	
 	
 	/**
-	 * Metodo que obtiene la informacion de todos los Alojamientos mas populares en la base de datos <br/>
+	 * Metodo que obtiene la informacion de todos las ofertas mas populares en la base de datos <br/>
 	 * <b>Precondicion: </b> la conexion a sido inicializadoa <br/>
-	 * @return	lista con la informacion de todos los Alojamientos que se encuentran en la Base de Datos
+	 * @return	lista con la informacion de todos las ofertas que se encuentran en la Base de Datos
 	 * @throws SQLException Genera excepcion si hay error en la conexion o en la consulta SQL
 	 * @throws Exception Si se genera un error dentro del metodo.
 	 */
 	public ArrayList<MejoresOfertas> getAlojamientosMasPopulares() throws SQLException, Exception {
-		ArrayList<MejoresOfertas> Alojamientos = new ArrayList<MejoresOfertas>();
+		ArrayList<MejoresOfertas> ofertas = new ArrayList<MejoresOfertas>();
 
-		String sql = "SELECT A.* FROM (SELECT ALO.ID as id_alojamiento,OPE.NOMBRE AS OPERADOR,ALO.UBICACION AS UBICACION ,COUNT(RE.ID) AS mas_reservado FROM (ISIS2304A431810.RESERVAS RE INNER JOIN ISIS2304A431810.OFERTAS ALO ON RE.ID_OFERTA=ALO.ID INNER JOIN ISIS2304A431810.OPERADORES OPE ON ALO.ID_OPERADOR=OPE.ID) GROUP BY ALO.ID,ALO.UBICACION, OPE.NOMBRE ORDER BY COUNT(RE.ID) DESC) A WHERE ROWNUM<20";
+		String sql = "SELECT C.* FROM (SELECT ofe.ID as id_alojamiento,ope.NOMBRE AS OPERADOR,ofe.UBICACION AS UBICACION ,COUNT(RE.ID) AS mas_reservado FROM (" +USUARIO + ".RESERVAS RE INNER JOIN " +USUARIO + ".OFERTAS ofe ON RE.ID_OFERTA=ofe.ID INNER JOIN " +USUARIO + ".OPERADORES ope ON ofe.ID_OPERADOR=ope.ID) GROUP BY ofe.ID,ofe.UBICACION, ope.NOMBRE ORDER BY COUNT(RE.ID) DESC) C WHERE ROWNUM<20";
 
 		PreparedStatement prepStmt = conn.prepareStatement(sql);
 		recursos.add(prepStmt);
@@ -679,18 +673,18 @@ public class DAOOferta {
 			String ubicacion = rs.getString("UBICACION");
 			String numReserva = rs.getString("MAS_RESERVADO");
 			MejoresOfertas actual = new MejoresOfertas(id, operador, ubicacion, numReserva);
-			Alojamientos.add(actual);		}
-		return Alojamientos;
+			ofertas.add(actual);		}
+		return ofertas;
 	}
 	/**
-	 * Metodo que obtiene la informacion de todos los Alojamientos con restriccion de fecha y servicios <br/>
+	 * Metodo que obtiene la informacion de todos las ofertas con restriccion de fecha y servicios <br/>
 	 * <b>Precondicion: </b> la conexion a sido inicializadoa <br/>
-	 * @return	lista con la informacion de todos los Alojamientos que se encuentran en la Base de Datos
+	 * @return	lista con la informacion de todos las ofertas que se encuentran en la Base de Datos
 	 * @throws SQLException Genera excepcion si hay error en la conexion o en la consulta SQL
 	 * @throws Exception Si se genera un error dentro del metodo.
 	 */
 	public ArrayList<Oferta> getAlojamientosConRestriccion(Condicion pCondiciones) throws SQLException, Exception {
-		ArrayList<Oferta> Alojamientos = new ArrayList<Oferta>();
+		ArrayList<Oferta> ofertas = new ArrayList<Oferta>();
 		if(pCondiciones.getFechaFin()!= null && pCondiciones!=null && pCondiciones.getServicios()!= null&& !pCondiciones.getServicios().isEmpty())
 		{
 			DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
@@ -698,8 +692,8 @@ public class DAOOferta {
 			Date fechaFin = pCondiciones.getFechaFin();
 			String x1 = dateFormat.format(fechaInicio);
 			String x2 = dateFormat.format(fechaFin);
-		   String sql = "SELECT * FROM ISIS2304A431810.OFERTAS ALO WHERE ALO.ID NOT IN ( SELECT RE.ID_OFERTA FROM  ISIS2304A431810.RESERVAS RE WHERE( RE.FECHA_INICIO  BETWEEN '"+x1+"' AND '"+x2+"')";
-			String sql2	=	" ) AND ALO.ID IN ( SELECT SEO.ID_OFERTA FROM  ISIS2304A431810.OFRECEN SEO INNER JOIN  ISIS2304A431810.SERVICIOS SE ON SE.ID=SEO.ID_SERVICIO WHERE ";
+		   String sql = "SELECT * FROM " +USUARIO + ".OFERTAS ofe WHERE ofe.ID NOT IN ( SELECT RE.ID_OFERTA FROM  " +USUARIO + ".RESERVAS RE WHERE( res.FECHA_INICIO  BETWEEN '"+x1+"' AND '"+x2+"')";
+			String sql2	=	" ) AND ofe.ID IN ( SELECT SEO.ID_OFERTA FROM  " +USUARIO + ".OFRECEN SEO INNER JOIN  " +USUARIO + ".SERVICIOS SE ON SE.ID=SEO.ID_SERVICIO WHERE ";
 			String sql3 = "";
 			for (int i = 1; i < pCondiciones.getServicios().size(); i++) {
 				String actual = pCondiciones.getServicios().get(i).getNombre();
@@ -713,12 +707,12 @@ public class DAOOferta {
 
 
 			while (rs.next()) {
-				Alojamientos.add(convertResultSetToOferta(rs));
+				ofertas.add(convertResultSetToOferta(rs));
 			}
 		}
 		else
 			throw new Exception("Condiciones de busqueda invalidas");
-		return Alojamientos;
+		return ofertas;
 	}
 	
 	
@@ -738,8 +732,6 @@ public class DAOOferta {
 		DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 		Date fechaInicio = cond.getFechaInicio();
 		Date fechaFin = cond.getFechaFin();
-		String x1 = dateFormat.format(fechaInicio);
-		String x2 = dateFormat.format(fechaFin);
 
 		long diff = fechaFin.getTime() - fechaInicio.getTime();
 		int n=(int) TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
@@ -756,11 +748,11 @@ public class DAOOferta {
 			double maxRecaudacion= -1;
 			Date d1 = fechaInicio;
 
-			for(int i=0;i<n;i++)//puede cambairse este while
+			for(int i=0;i<n;i++)
 			{
 
 				String xi=dateFormat.format(d1);
-				String sql=String.format("SELECT COUNT(*) AS OCUPACION  FROM RESERVAS RE INNER JOIN OFERTAS ALO ON ALO.ID=RE.ID_OFERTA WHERE "+xi+" BETWEEN RE.FECHA_INICIO AND RE.FECHA_FIN  AND RE.CANCELADA='F' AND  ALO.TIPO = %1$s",tipo);
+				String sql=String.format("SELECT COUNT(*) AS OCUPACION  FROM RESERVAS res INNER JOIN OFERTAS ofe ON ofe.ID=res.ID_OFERTA WHERE "+xi+" BETWEEN res.FECHA_INICIO AND res.FECHA_FIN  AND res.CANCELADA='F' AND  ofe.TIPO = %1$s",tipo);
 				System.out.println(sql);
 				PreparedStatement prepStmt = conn.prepareStatement(sql);
 				recursos.add(prepStmt);
@@ -778,7 +770,7 @@ public class DAOOferta {
 					diaminOcu=xi;
 				}
 
-				String sql2=String.format("SELECT SUM(COSTO_DEFINITIVO) AS TOTAL_COBRADO_POR_DIA FROM RESERVAS RE INNER JOIN OFERTAS ALO ON RE.ID_OFERTA=ALO.ID WHERE (RE.TERMINADA='T' AND RE.FECHA_FIN=" +xi+ " )OR (RE.CANCELADA='T' AND RE.FECHA_CANCELACION=" +xi +") AND  ALO.TIPO = $1$S",tipo);
+				String sql2=String.format("SELECT SUM(COSTO_DEFINITIVO) AS TOTAL_COBRADO_POR_DIA FROM RESERVAS res INNER JOIN OFERTAS ofe ON res.ID_OFERTA=ofe.ID WHERE (res.TERMINADA='T' AND res.FECHA_FIN=" +xi+ " )OR (res.CANCELADA='T' AND res.FECHA_CANCELACION=" +xi +") AND  ofe.TIPO = $1$S",tipo);
 			    System.out.println(sql2);
 				PreparedStatement prepStmt2 = conn.prepareStatement(sql);
 				recursos.add(prepStmt2);
@@ -798,8 +790,8 @@ public class DAOOferta {
 				d1=d2;
 			}
 			pReporte.add("la ocupacion maxima se da en "+diamaxOcu+"cuando hay ocupados "+maxOcupacion+" alojamientos");
-			pReporte.add("la ocupacion maxima se da en "+diaminOcu+"cuando hay ocupados "+minOcuapcion+" alojamientos");
-			pReporte.add("la ocupacion maxima se da en "+diamaxRec+"cuando hay cancelados $"+maxRecaudacion);
+			pReporte.add("la ocupacion mínima se da en "+diaminOcu+"cuando hay ocupados "+minOcuapcion+" alojamientos");
+			pReporte.add("los mayores ingresos se dan en "+diamaxRec+"cuando se recauda $"+maxRecaudacion);
 		}
 	
 		Documentacion result=new Documentacion(pReporte);
@@ -809,14 +801,14 @@ public class DAOOferta {
 	
 	
 	/**
-	 * Metodo que obtiene la informacion de todos los Alojamientos que no tienen reservas durante 1 mes completo <br/>
-	 * <b>Precondicion: </b> la conexion a sido inicializadoa <br/>
-	 * @return	lista con la informacion de todos los Alojamientos que se no fueron usados durante 1 mes o mas
+	 * Metodo que obtiene la informacion de todos las ofertas que no tienen reservas durante 1 mes completo <br/>
+	 * <b>Precondicion: </b> la conexion ha sido inicializada <br/>
+	 * @return	lista con la informacion de todos las ofertas que se no fueron usados durante 1 mes o mas
 	 * @throws SQLException Genera excepcion si hay error en la conexion o en la consulta SQL
 	 * @throws Exception Si se genera un error dentro del metodo.
 	 */
-	public ArrayList<Oferta> getAlojamientosDesiertos(Condicion pCondiciones) throws SQLException, Exception {
-		ArrayList<Oferta> Alojamientos = new ArrayList<Oferta>();
+	public ArrayList<Oferta> getAlojamientosPocaDemanda(Condicion pCondiciones) throws SQLException, Exception {
+		ArrayList<Oferta> ofertas = new ArrayList<Oferta>();
 		if(pCondiciones.getFechaFin()!= null && pCondiciones!=null && pCondiciones.getServicios()!= null&& !pCondiciones.getServicios().isEmpty())
 		{
 			DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
@@ -824,33 +816,22 @@ public class DAOOferta {
 			Date fechaFin = pCondiciones.getFechaFin();
 			String x1 = dateFormat.format(fechaInicio);
 			String x2 = dateFormat.format(fechaFin);
-		   String sql = "SELECT * FROM ISIS2304A431810.OFERTAS ALO WHERE ALO.ID NOT IN ( SELECT RE.ID_OFERTA FROM  ISIS2304A431810.RESERVAS RE WHERE( RE.FECHA_INICIO  BETWEEN '"+x1+"' AND '"+x2+"')";
-			String sql2	=	" ) AND ALO.ID IN ( SELECT SEO.ID_OFERTA FROM  ISIS2304A431810.OFRECEN SEO INNER JOIN  ISIS2304A431810.SERVICIOS SE ON SE.ID=SEO.ID_SERVICIO WHERE ";
-			String sql3 = "";
-			for (int i = 1; i < pCondiciones.getServicios().size(); i++) {
-				String actual = pCondiciones.getServicios().get(i).getNombre();
-				sql3+=" SE.NOMBRE='"+actual+"'OR ";
-			}
-			String sql4 =  "SE.NOMBRE='"+pCondiciones.getServicios().get(0).getNombre()+"' )";
-			System.out.println(sql+sql2+sql3+sql4);
-			PreparedStatement prepStmt = conn.prepareStatement(sql+sql2+sql3+sql4);
+		    String sql = "SELECT * FROM " +USUARIO + ".OFERTAS ofe WHERE ofe.ID NOT IN ( SELECT res.ID_OFERTA FROM  " +USUARIO + ".RESERVAS res WHERE( res.FECHA_INICIO  BETWEEN '"+x1+"' AND '"+x2+"')";
+
+			PreparedStatement prepStmt = conn.prepareStatement(sql);
 			recursos.add(prepStmt);
 			ResultSet rs = prepStmt.executeQuery();
 
 
 			while (rs.next()) {
-				Alojamientos.add(convertResultSetToOferta(rs));
+				ofertas.add(convertResultSetToOferta(rs));
 			}
 		}
 		else
 			throw new Exception("Condiciones de busqueda invalidas");
-		return Alojamientos;
+		return ofertas;
 	}
 	
-	//----------------------------------------------------------------------------------------------------------------------------------
-	// METODOS AUXILIARES
-	//----------------------------------------------------------------------------------------------------------------------------------
-
 	/**
 	 * Metodo encargado de inicializar la conexion del DAO a la Base de Datos a partir del parametro <br/>
 	 * <b>Postcondicion: </b> el atributo conn es inicializado <br/>

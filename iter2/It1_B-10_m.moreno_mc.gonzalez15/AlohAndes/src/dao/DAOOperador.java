@@ -144,7 +144,6 @@ public class DAOOperador {
 	 * @throws Exception Si se genera un error dentro del metodo.
 	 */
 	public void updateOperador(Operador operador) throws SQLException, Exception {
-		//No actualiza los alojamientos.
 		StringBuilder sql = new StringBuilder();
 		sql.append(String.format("UPDATE %s.OPERADORES SET ", USUARIO));
 		sql.append(String.format("NOMBRE = '%1$s' , CONTACTO = '%2$s'", operador.getNombre(), operador.getCorreo()));
@@ -190,7 +189,7 @@ public class DAOOperador {
 
 		Date date1 = new Date();
 		int anhoActual = date1.getYear()+1900;
-		String sql2 = "SELECT OPE.ID,OPE.NOMBRE, SUM(RE.PRECIO_TOTAL) AS GANANCIA FROM "+USUARIO +".RESERVAS RE INNER JOIN "+USUARIO +".OFERTAS ALO ON ALO.ID=RE.ID_OFERTA INNER JOIN " +USUARIO+ ".OPERADORES OPE ON  ALO.ID_OPERADOR=OPE.ID WHERE RE.FECHA_FIN BETWEEN '01/01/"+anhoActual+"' AND '31/12/"+anhoActual+"' AND  RE.TERMINADA='T' GROUP BY OPE.ID, OPE.NOMBRE";
+		String sql2 = "SELECT ope.ID,ope.NOMBRE, SUM(res.PRECIO_TOTAL) AS GANANCIA FROM "+USUARIO +".RESERVAS res INNER JOIN "+USUARIO +".OFERTAS ofe ON ofe.ID=res.ID_OFERTA INNER JOIN " +USUARIO+ ".OPERADORES ope ON  ofe.ID_OPERADOR=ope.ID WHERE res.FECHA_FIN BETWEEN '01/01/"+anhoActual+"' AND '31/12/"+anhoActual+"' AND  res.TERMINADA='T' GROUP BY ope.ID, ope.NOMBRE";
 		
 		System.out.println(sql2);
 		
@@ -220,7 +219,7 @@ public class DAOOperador {
 
 		Date date1 = new Date();
 		int anhoActual = date1.getYear()+1900;
-		String sql2 = "SELECT OPE.ID,OPE.NOMBRE, SUM(RE.PRECIO_TOTAL) AS GANANCIA FROM "+USUARIO +".RESERVAS RE INNER JOIN "+USUARIO +".OFERTAS ALO ON ALO.ID=RE.ID_OFERTA INNER JOIN " +USUARIO+ ".OPERADORES OPE ON  ALO.ID_OPERADOR=OPE.ID WHERE RE.FECHA_FIN BETWEEN '01/01/"+(anhoActual-1)+"' AND '31/12/"+(anhoActual-1)+"' AND  RE.TERMINADA='T' GROUP BY OPE.ID, OPE.NOMBRE";
+		String sql2 = "SELECT ope.ID,ope.NOMBRE, SUM(res.PRECIO_TOTAL) AS GANANCIA FROM "+USUARIO +".RESERVAS res INNER JOIN "+USUARIO +".OFERTAS ofe ON ofe.ID=res.ID_OFERTA INNER JOIN " +USUARIO+ ".OPERADORES ope ON  ofe.ID_OPERADOR=ope.ID WHERE res.FECHA_FIN BETWEEN '01/01/"+(anhoActual-1)+"' AND '31/12/"+(anhoActual-1)+"' AND  res.TERMINADA='T' GROUP BY ope.ID, ope.NOMBRE";
 		System.out.println(sql2);
 		
 		PreparedStatement prepStmt2 = conn.prepareStatement(sql2);
@@ -249,7 +248,7 @@ public class DAOOperador {
 		DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 		Date date1 = new Date();
 		String x = dateFormat.format(date1);
-		String sql2 = "SELECT OPE.ID, OPE.NOMBRE, SUM(RE.NUM_PERSONAS)/SUM(ALO.CAPACIDAD) AS PORCENTAJE_OCUPACION FROM ISIS2304A431810.OPERADORES OPE INNER JOIN ISIS2304A431810.OFERTAS ALO ON OPE.ID=ALO.ID_OPERADOR INNER JOIN ISIS2304A431810.RESERVAS RE ON RE.ID_OFERTA= ALO.ID WHERE RE.CANCELADA='F' AND '"+x+"' BETWEEN RE.FECHA_INICIO AND RE.FECHA_FIN GROUP BY OPE.ID,OPE.NOMBRE";
+		String sql2 = "SELECT ope.ID, ope.NOMBRE, SUM(res.NUM_PERSONAS)/SUM(ofe.CAPACIDAD) AS PORCENTAJE_OCUPACION FROM "+ USUARIO + ".OPERADORES ope INNER JOIN "+ USUARIO + ".OFERTAS ofe ON ope.ID=ofe.ID_OPERADOR INNER JOIN "+ USUARIO + ".RESERVAS res ON res.ID_OFERTA= ofe.ID WHERE res.CANCELADA='F' AND '"+x+"' BETWEEN res.FECHA_INICIO AND res.FECHA_FIN GROUP BY ope.ID,ope.NOMBRE";
 		System.out.println(sql2);
 		
 		PreparedStatement prepStmt2 = conn.prepareStatement(sql2);

@@ -182,18 +182,18 @@ public class DAOCliente {
 		ArrayList<String> clientes = new ArrayList<String>();
 		
 
-	String sql=String.format("SELECT RES.ID_OFERTA,RES.ID_CLIENTE,CLI.NOMBRE,CLI.CORREO,COUNT(*) AS NUMERO_OCASIONES,SUM(TRUNC(RES.FECHA_FIN)-TRUNC(RES.FECHA_INICIO))   AS NUM_NOCHES");
-	String sql2=String.format(	" FROM RESERVAS RES INNER JOIN CLIENTES CLI ON CLI.ID=RES.ID_CLIENTE WHERE RES.ID_OFERTA = %1$d AND RES.CANCELADA='F' ",id);
-	String sql3=String.format(" GROUP BY RES.ID_CLIENTE, RES.ID_OFERTA,CLI.NOMBRE,CLI.CORREO HAVING COUNT(*)>=3 OR SUM(TRUNC(RES.FECHA_FIN)-TRUNC(RES.FECHA_INICIO)) >=15");
+	String sql=String.format("SELECT res.ID_OFERTA,res.ID_CLIENTE,cli.NOMBRE,cli.CORREO,COUNT(*) AS NUMERO_OCASIONES,SUM(TRUNC(res.FECHA_FIN)-TRUNC(res.FECHA_INICIO)) AS NUM_NOCHES");
+	String sql2=String.format(	" FROM RESERVAS res INNER JOIN CLIENTES cli ON cli.ID=res.ID_CLIENTE WHERE res.ID_OFERTA = %1$d AND res.CANCELADA='F' ",id);
+	String sql3=String.format(" GROUP BY res.ID_CLIENTE, res.ID_OFERTA,cli.NOMBRE,cli.CORREO HAVING COUNT(*)>=3 OR SUM(TRUNC(res.FECHA_FIN)-TRUNC(res.FECHA_INICIO)) >=15");
 	
 		System.out.println(sql+sql2+sql3);
 		PreparedStatement prepStmt = conn.prepareStatement(sql+sql2+sql3);
 		recursos.add(prepStmt);
 		ResultSet rs = prepStmt.executeQuery();
 		String z = "No existen cliente fieles";
-		boolean entro = false;
+		boolean existen = false;
 		while (rs.next()) {
-			entro = true;
+			existen = true;
 			String idAlojamiento = rs.getString("ID_OFERTA");
 			String idCliente = rs.getString("ID_CLIENTE");
 			String nombre = rs.getString("NOMBRE");
@@ -203,7 +203,7 @@ public class DAOCliente {
 			String y = "El Alojamiento con id: "+ idAlojamiento+" tiene un cliente fiel, identificado con id: "+ idCliente+", con nombre: " + nombre+" y correo: "+contacto+". Ha visitado el alojamiento en: "+numOcasiones+" ocasiones y se ha hospedado un total de: "+numNoches+" noches";
 			clientes.add(y);
 		}
-		if(!entro)
+		if(!existen)
 		{
 			clientes.add(z);
 		}
@@ -224,8 +224,7 @@ public class DAOCliente {
 	 */
 	public ArrayList<UtilizacionAloh> getUsoAlohAndes() throws SQLException, Exception {
 		ArrayList<UtilizacionAloh> clientes = new ArrayList<UtilizacionAloh>();
-// WARNING EN ESTA SENTENCIA SQL USA LA TABLA RELACION QUE NOSOTRAS NO TENEMOS////////
-		String sql = "SELECT RELA.TIPO,ALO.TIPO AS TIPO_ALOJAMIENTO,SUM(RE.PRECIO_TOTAL) AS DINERO_PAGADO,SUM(RE.NUM_DIAS) AS DIAS_CONTRATADOS FROM "+USUARIO+".CLIENTES CLI INNER JOIN "+USUARIO+".RESERVAS RE ON RE.ID_CLIENTE=CLI.ID INNER JOIN "+USUARIO+".OFERTAS ALO ON ALO.ID=RE.ID_OFERTA INNER JOIN "+USUARIO+".RELACIONES RELA ON RELA.ID=CLI.ID_RELACION GROUP BY RELA.TIPO,ALO.TIPO";
+		String sql = "SELECT cli.TIPO, ofe.TIPO AS TIPO_ALOJAMIENTO,SUM(res.PRECIO_TOTAL) AS PRECIO_TOTAL,SUM(res.NUM_DIAS) AS NUM_DIAS FROM "+USUARIO+".CLIENTES cli INNER JOIN "+USUARIO+".RESERVAS res ON res.ID_CLIENTE=cli.ID INNER JOIN "+USUARIO+".OFERTAS ofe ON ofe.ID=res.ID_OFERTA GROUP BY cli.TIPO,ofe.TIPO";
 
 		PreparedStatement prepStmt = conn.prepareStatement(sql);
 		recursos.add(prepStmt);
@@ -234,8 +233,8 @@ public class DAOCliente {
 		while (rs.next()) {
 			String tipoUsuario = rs.getString("tipo");
 			String tipoAlojamiento = rs.getString("TIPO_ALOJAMIENTO");
-			String dineroPagado = rs.getString("DINERO_PAGADO");
-			String dias = rs.getString("DIAS_CONTRATADOS");
+			String dineroPagado = rs.getString("PRECIO_TOTAL");
+			String dias = rs.getString("NUM_DIAS");
 			UtilizacionAloh actual = new UtilizacionAloh(tipoUsuario, tipoAlojamiento, dineroPagado, dias);
 			clientes.add(actual);
 		}
@@ -251,11 +250,11 @@ public class DAOCliente {
 	 * @throws SQLException SQLException Genera excepcion si hay error en la conexion o en la consulta SQL
 	 * @throws Exception Si se genera un error dentro del metodo.
 	 */
-	public EstadisticasCliente getEstadisticasCliente(Cliente cliente1) throws SQLException, Exception 
+	public EstadisticasCliente getEstadisticasCliente(Cliente cliente) throws SQLException, Exception 
 	{
-		EstadisticasCliente cliente = null;
+		EstadisticasCliente eCliente = null;
 
-		String sql = "SELECT CLI.ID,  CLI.NOMBRE,ALO.TIPO AS TIPO_ALOJAMIENTO,SUM(RE.PRECIO_TOTAL) AS DINERO_PAGADO,SUM(RE.NUM_DIAS) AS DIAS_CONTRATADOS FROM ISIS2304A431810.CLIENTES CLI INNER JOIN  ISIS2304A431810.RESERVAS RE ON RE.ID_CLIENTE=CLI.ID INNER JOIN ISIS2304A431810.OFERTAS ALO ON ALO.ID=RE.ID_OFERTA WHERE CLI.NOMBRE='"+cliente1.getNombre()+"' GROUP BY CLI.NOMBRE,CLI.ID,ALO.TIPO"; 
+		String sql = "SELECT cli.ID,  cli.NOMBRE,ofe.TIPO AS TIPO_ALOJAMIENTO,SUM (res.PRECIO_TOTAL) AS PRECIO_TOTAL,SUM(res.NUM_DIAS) AS NUM_DIAS FROM" +USUARIO+".CLIENTES cli INNER JOIN" + USUARIO + ".RESERVAS res ON res.ID_CLIENTE=cli.ID INNER JOIN" +USUARIO+".OFERTAS ofe ON ofe.ID=res.ID_OFERTA WHERE cli.NOMBRE='"+cliente.getNombre()+"' GROUP BY cli.NOMBRE,cli.ID,ofe.TIPO"; 
 
 		PreparedStatement prepStmt = conn.prepareStatement(sql);
 		recursos.add(prepStmt);
@@ -265,22 +264,15 @@ public class DAOCliente {
 			String id = rs.getString("ID");
 			String nombre = rs.getString("NOMBRE");
 			String tipo = rs.getString("TIPO_ALOJAMIENTO");
-			String dinero = rs.getString("DINERO_PAGADO");
-			String dias = rs.getString("DIAS_CONTRATADOS");
-			cliente = new EstadisticasCliente(id,nombre,tipo,dinero,dias);
+			String dinero = rs.getString("PRECIO_TOTAL");
+			String dias = rs.getString("NUM_DIAS");
+			eCliente = new EstadisticasCliente(id,nombre,tipo,dinero,dias);
 		}
 
-		return cliente;
+		return eCliente;
 	}
 	
 	
-	
-	
-	
-	//----------------------------------------------------------------------------------------------------------------------------------
-	// METODOS AUXILIARES
-	//----------------------------------------------------------------------------------------------------------------------------------
-
 	/**
 	 * Metodo encargado de inicializar la conexion del DAO a la Base de Datos a partir del parametro <br/>
 	 * <b>Postcondicion: </b> el atributo conn es inicializado <br/>

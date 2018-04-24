@@ -55,27 +55,6 @@ public class DAOReserva {
 	// METODOS DE COMUNICACION CON LA BASE DE DATOS
 	//----------------------------------------------------------------------------------------------------------------------------------
 
-	/**
-	 * Metodo que obtiene la informacion de todos los reservas en la Base de Datos <br/>
-	 * <b>Precondicion: </b> la conexion a sido inicializadoa <br/>
-	 * @return	lista con la informacion de todos los reservas que se encuentran en la Base de Datos
-	 * @throws SQLException Genera excepcion si hay error en la conexion o en la consulta SQL
-	 * @throws Exception Si se genera un error dentro del metodo.
-	 */
-//	public ArrayList<Reserva> getReservas( DAOOferta daoOferta, DAOCliente daoCliente) throws SQLException, Exception {
-//		ArrayList<Reserva> reservas = new ArrayList<Reserva>();
-//
-//		String sql = String.format("SELECT * FROM %1$s.RESERVAS", USUARIO);
-//
-//		PreparedStatement prepStmt = conn.prepareStatement(sql);
-//		recursos.add(prepStmt);
-//		ResultSet rs = prepStmt.executeQuery();
-//
-//		while (rs.next()) {
-//			reservas.add(convertResultSetToReserva(rs,daoOferta,daoCliente));
-//		}
-//		return reservas;
-//	}
 
 	public ArrayList<Reserva> getReservas( DAOOferta daoOferta, DAOCliente daoCliente) throws SQLException, Exception {
 		ArrayList<Reserva> reservas = new ArrayList<Reserva>();
@@ -126,7 +105,6 @@ public class DAOReserva {
 	 * @throws SQLException SQLException Genera excepcion si hay error en la conexion o en la consulta SQL
 	 * @throws Exception Si se genera un error dentro del metodo.
 	 */
-	///REQ 1,2///
 	
 	public void addReserva (Reserva Reserva) throws SQLException, Exception {
 		DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
@@ -184,10 +162,10 @@ public class DAOReserva {
 			System.out.println(sql);
 		}
 		PreparedStatement prepStmt = conn.prepareStatement(sql);
-		//recursos.add(prepStmt);
+
 		prepStmt.executeQuery();
 		prepStmt.close();
-		//Pendiente anhadir los servicios a tablas.
+
 
 	}
 
@@ -210,19 +188,19 @@ public class DAOReserva {
 		DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 		String fecha1 = "'"+dateFormat.format(fechaInicio)+"'";
 		String fecha2 = "'"+dateFormat.format(fechaFin)+"'";
-		String sql = "SELECT * FROM "+USUARIO+".OFERTAS ALO WHERE ALO.ID NOT IN ( SELECT RE.ID_OFERTA FROM  "+USUARIO+".RESERVAS RE WHERE( RE.FECHA_INICIO  BETWEEN "+fecha1+" AND "+fecha2+") OR  ( RE.FECHA_FIN  BETWEEN "+fecha1+" AND "+fecha2+") OR (  RE.FECHA_INICIO <"+fecha1+"  AND   RE.FECHA_FIN>  "+fecha2+") ) AND ALO.ID IN ( SELECT ALOJA.ID FROM  "+USUARIO+".OFERTAS ALOJA WHERE ALOJA.TIPO='"+tipo+"')";
+		String sql = "SELECT * FROM "+USUARIO+".OFERTAS ofe WHERE ofe.ID NOT IN ( SELECT res.ID_OFERTA FROM  "+USUARIO+".RESERVAS res WHERE( res.FECHA_INICIO  BETWEEN "+fecha1+" AND "+fecha2+") OR  ( res.FECHA_FIN  BETWEEN "+fecha1+" AND "+fecha2+") OR (  res.FECHA_INICIO <"+fecha1+"  AND   res.FECHA_FIN>  "+fecha2+") ) AND ofe.ID IN ( SELECT ofer.ID FROM  "+USUARIO+".OFERTAS ofer WHERE ofer.TIPO='"+tipo+"')";
 		System.out.println(sql);
 		PreparedStatement prepStmt = conn.prepareStatement(sql);
 		recursos.add(prepStmt);
 		ResultSet rs = prepStmt.executeQuery();
 		System.out.println("die");
-		String sql3 = "SELECT COUNT (*) AS NUM_ALOJAMIENTOS FROM "+USUARIO+".OFERTAS ALO WHERE ALO.ID NOT IN ( SELECT RE.ID_OFERTA FROM  "+USUARIO+".RESERVAS RE WHERE( RE.FECHA_INICIO  BETWEEN "+fecha1+" AND "+fecha2+") OR  ( RE.FECHA_FIN  BETWEEN "+fecha1+" AND "+fecha2+") OR (  RE.FECHA_INICIO <"+fecha1+"  AND   RE.FECHA_FIN>  "+fecha2+") ) AND ALO.ID IN ( SELECT ALOJA.ID FROM  "+USUARIO+".OFERTAS ALOJA WHERE ALOJA.TIPO='"+tipo+"')";
+		String sql3 = "SELECT COUNT (*) AS NUM_OFERTAS FROM "+USUARIO+".OFERTAS ofe WHERE ofe.ID NOT IN ( SELECT res.ID_OFERTA FROM  "+USUARIO+".RESERVAS res WHERE( res.FECHA_INICIO  BETWEEN "+fecha1+" AND "+fecha2+") OR  ( res.FECHA_FIN  BETWEEN "+fecha1+" AND "+fecha2+") OR (  res.FECHA_INICIO <"+fecha1+"  AND   res.FECHA_FIN>  "+fecha2+") ) AND ofe.ID IN ( SELECT ofer.ID FROM  "+USUARIO+".OFERTAS ofer WHERE ofer.TIPO='"+tipo+"')";
 		System.out.println(sql3);
 		PreparedStatement prepStmt3 = conn.prepareStatement(sql3);
 		recursos.add(prepStmt3);
 		ResultSet rs3 = prepStmt3.executeQuery();
 		rs3.next();
-		int rowcount = Integer.parseInt(rs3.getString("NUM_ALOJAMIENTOS"));
+		int rowcount = Integer.parseInt(rs3.getString("NUM_OFERTAS"));
 		if(rowcount >= reservaColectiva.getCantidad())
 		{
 			String sql2 = "SELECT MAX(ID) as MAXIMO FROM "+USUARIO+".RESERVAS";
