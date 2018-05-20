@@ -1,5 +1,6 @@
 package rest;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -18,6 +19,7 @@ import javax.ws.rs.core.Response;
 
 import tm.TransactionManager;
 import vos.Cliente;
+import vos.CondicionF10;
 
 
 
@@ -30,7 +32,7 @@ public class ClientesService {
 	//----------------------------------------------------------------------------------------------------------------------------------
 	// ATRIBUTOS
 	//----------------------------------------------------------------------------------------------------------------------------------
-	
+
 	/**
 	 * Atributo que usa la anotacion @Context para tener el ServletContext de la conexion actual.
 	 */
@@ -67,10 +69,10 @@ public class ClientesService {
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response getClientes() {
-		
+
 		try {
 			TransactionManager tm = new TransactionManager(getPath());
-			
+
 			List<Cliente> Clientes;
 			Clientes = tm.getAllClientes();
 			return Response.status(200).entity(Clientes).build();
@@ -94,7 +96,7 @@ public class ClientesService {
 	{
 		try{
 			TransactionManager tm = new TransactionManager( getPath( ) );
-			
+
 			Cliente Cliente = tm.getClienteById( id );
 			return Response.status( 200 ).entity( Cliente ).build( );			
 		}
@@ -117,7 +119,7 @@ public class ClientesService {
 	@Produces( { MediaType.APPLICATION_JSON } )
 	@Consumes({ MediaType.APPLICATION_JSON })
 	public Response addCliente(Cliente Cliente) {
-		
+
 		try{
 			TransactionManager tm = new TransactionManager( getPath( ) );
 			tm.addCliente(Cliente);
@@ -128,7 +130,7 @@ public class ClientesService {
 			return Response.status( 500 ).entity( doErrorMessage( e ) ).build( );
 		}
 	}
-	
+
 
 	/**
 	 * Metodo que recibe un Cliente en formato JSON y lo agrega a la Base de Datos <br/>
@@ -162,12 +164,12 @@ public class ClientesService {
 	 * @return	<b>Response Status 200</b> - JSON que contiene al Cliente que se desea eliminar <br/>
 	 * 			<b>Response Status 500</b> - Excepcion durante el transcurso de la transaccion
 	 */
-    @DELETE
-    @Consumes(MediaType.APPLICATION_JSON)
+	@DELETE
+	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	
+
 	public Response deleteCliente(Cliente Cliente) {
-    	try{
+		try{
 			TransactionManager tm = new TransactionManager( getPath( ) );
 			tm.deleteCliente(Cliente);
 			return Response.status( 200 ).entity( Cliente ).build( );			
@@ -178,4 +180,74 @@ public class ClientesService {
 		}
 	}
 
+
+
+
+	/**
+	 * Metodo GET que trae el consumo de los clientes que cubren <br/>
+	 * <b>Precondicion: </b> el archivo <em>'conectionData'</em> ha sido inicializado con las credenciales del usuario <br/>
+	 * <b>URL: </b> http://localhost:8080/AlohAndesMaster/rest/clientesfieles/{id} <br/>
+	 * @return	<b>Response Status 200</b> - JSON Cliente que contiene al Cliente cuyo ID corresponda al parametro <br/>
+	 * 			<b>Response Status 500</b> - Excepcion durante el transcurso de la transaccion
+	 */
+	@PUT
+	@Path( "consumoAlohandes/{id: \\d+}" )
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces( { MediaType.APPLICATION_JSON } )
+	public Response getConsumoAlohandes(  @PathParam( "id" ) Long id, CondicionF10 pCondicion )
+	{
+		try{
+			TransactionManager tm = new TransactionManager( getPath( ) );
+
+			String id1 =id+"";
+			String id2 =pCondicion.getIdAlojamiento()+"";
+
+			if(!id1.equals(id2))
+			{
+				throw new Exception ("Usted no tiene acceso a esos datos");
+			}
+
+			ArrayList <Cliente> Cliente = tm.getConsumoAlohandes(pCondicion);
+			return Response.status( 200 ).entity( Cliente ).build( );			
+		}
+		catch( Exception e )
+		{
+			return Response.status( 500 ).entity( doErrorMessage( e ) ).build( );
+		}
+	}
+
+	/**
+	 * Metodo GET que trae el consumo de los clientes que cubren <br/>
+	 * <b>Precondicion: </b> el archivo <em>'conectionData'</em> ha sido inicializado con las credenciales del usuario <br/>
+	 * <b>URL: </b> http://localhost:8080/AlohAndesMaster/rest/clientesfieles/{id} <br/>
+	 * @return	<b>Response Status 200</b> - JSON Cliente que contiene al Cliente cuyo ID corresponda al parametro <br/>
+	 * 			<b>Response Status 500</b> - Excepcion durante el transcurso de la transaccion
+	 */
+	@PUT
+	@Path( "consumoAlohandesAlternativo/{id: \\d+}" )
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces( { MediaType.APPLICATION_JSON } )
+	public Response getConsumoAlohandesAlternativo(  @PathParam( "id" ) Long id, CondicionF10 pCondicion )
+	{
+		try{
+			TransactionManager tm = new TransactionManager( getPath( ) );
+
+			String id1 =id+"";
+			String id2 =pCondicion.getIdAlojamiento()+"";
+
+			if(!id1.equals(id2))
+			{
+				throw new Exception ("Usted no tiene acceso a esos datos");
+			}
+
+			ArrayList <Cliente> Cliente = tm.getConsumoAlohandesAlternativo(pCondicion);
+			return Response.status( 200 ).entity( Cliente ).build( );			
+		}
+		catch( Exception e )
+		{
+			return Response.status( 500 ).entity( doErrorMessage( e ) ).build( );
+		}
+	}
 }
+
+

@@ -1896,6 +1896,97 @@ public class TransactionManager{
 		}
 		return inf;	
 	}
+	
+	/**
+	 * Metodo que modela la transaccion que busca los clientes con ciertas condiciones <br/>
+	 * @param name -id del Cliente a buscar. id != null
+	 * @return Cliente - Cliente que se obtiene como resultado de la consulta.
+	 * @throws Exception -  cualquier error que se genere durante la transaccion
+	 */
+	public ArrayList<Cliente> getConsumoAlohandes(CondicionF10 pCondiciones) throws Exception {
+		DAOCliente daoCliente = new DAOCliente();
+		ArrayList <Cliente> x = new ArrayList<>();
+		try 
+		{
+			this.conn = darConexion();
+			conn.setAutoCommit(false);
+			daoCliente.setConn(conn);
+			x = daoCliente.getConsumoAlohandes(pCondiciones);
+			conn.commit();				
+
+		} 
+		catch (SQLException sqlException) {
+			conn.rollback();
+			System.err.println("[EXCEPTION] SQLException:" + sqlException.getMessage());
+			sqlException.printStackTrace();
+			throw sqlException;
+		} 
+		catch (Exception exception) {
+			conn.rollback();
+			System.err.println("[EXCEPTION] General Exception:" + exception.getMessage());
+			exception.printStackTrace();
+			throw exception;
+		} 
+		finally {
+			try {
+				daoCliente.cerrarRecursos();
+				if(this.conn!=null){
+					this.conn.close();					
+				}
+			}
+			catch (SQLException exception) {
+				System.err.println("[EXCEPTION] SQLException While Closing Resources:" + exception.getMessage());
+				exception.printStackTrace();
+				throw exception;
+			}
+		}
+		return x;
+	}
+
+	/**
+	 * Metodo que modela la transaccion que busca los clientes con ciertas condiciones <br/>
+	 * @param name -id del Cliente a buscar. id != null
+	 * @return Cliente - Cliente que se obtiene como resultado de la consulta.
+	 * @throws Exception -  cualquier error que se genere durante la transaccion
+	 */
+	public ArrayList<Cliente> getConsumoAlohandesAlternativo(CondicionF10 pCondiciones) throws Exception {
+		DAOCliente daoCliente = new DAOCliente();
+		ArrayList <Cliente> x = new ArrayList<>();
+		try 
+		{
+			this.conn = darConexion();
+			conn.setAutoCommit(false);
+			daoCliente.setConn(conn);
+			conn.commit();				
+
+		} 
+		catch (SQLException sqlException) {
+			conn.rollback();
+			System.err.println("[EXCEPTION] SQLException:" + sqlException.getMessage());
+			sqlException.printStackTrace();
+			throw sqlException;
+		} 
+		catch (Exception exception) {
+			conn.rollback();
+			System.err.println("[EXCEPTION] General Exception:" + exception.getMessage());
+			exception.printStackTrace();
+			throw exception;
+		} 
+		finally {
+			try {
+				daoCliente.cerrarRecursos();
+				if(this.conn!=null){
+					this.conn.close();					
+				}
+			}
+			catch (SQLException exception) {
+				System.err.println("[EXCEPTION] SQLException While Closing Resources:" + exception.getMessage());
+				exception.printStackTrace();
+				throw exception;
+			}
+		}
+		return x;
+	}
 
 
 
