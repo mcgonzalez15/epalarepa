@@ -19,7 +19,11 @@ import javax.ws.rs.core.Response;
 
 import tm.TransactionManager;
 import vos.Cliente;
+import vos.ClientePremium;
 import vos.CondicionF10;
+import vos.Documentacion;
+import vos.EstadisticasCliente;
+import vos.UtilizacionAloh;
 
 
 
@@ -180,6 +184,76 @@ public class ClientesService {
 		}
 	}
 
+	 /**
+		 * Metodo GET que trae a todos los Clientes en la Base de datos. <br/>
+		 * <b>Precondicion: </b> el archivo <em>'conectionData'</em> ha sido inicializado con las credenciales del usuario <br/>
+		 * <b>URL: </b> http://localhost:8080/AlohAndes/rest/Clientes <br/>
+		 * @return	<b>Response Status 200</b> - JSON que contiene a todos los Clientes que estan en la Base de Datos <br/>
+		 * 			<b>Response Status 500</b> - Excepcion durante el transcurso de la transaccion
+		 */			
+		@GET
+		@Produces({ MediaType.APPLICATION_JSON })
+		@Path("usoalohandes")
+		public Response getUsoAlohAndes() {
+			
+			try {
+				TransactionManager tm = new TransactionManager(getPath());
+				
+				List<UtilizacionAloh> Clientes;
+				Clientes = tm.getUtilizacionAloh();
+				return Response.status(200).entity(Clientes).build();
+			} 
+			catch (Exception e) {
+				return Response.status(500).entity(doErrorMessage(e)).build();
+			}
+		}
+		 /**
+			 * Metodo GET que trae a todas las estadisticas de un cliente dado por parametro. <br/>
+			 * <b>Precondicion: </b> el archivo <em>'conectionData'</em> ha sido inicializado con las credenciales del usuario <br/>
+			 * <b>URL: </b> http://localhost:8080/AlohAndes/rest/Clientes <br/>
+			 * @return	<b>Response Status 200</b> - JSON que contiene a todos los Clientes que estan en la Base de Datos <br/>
+			 * 			<b>Response Status 500</b> - Excepcion durante el transcurso de la transaccion
+			 */			
+			@PUT
+			@Produces({ MediaType.APPLICATION_JSON })
+			@Path("estadisticascliente")
+			public Response getEstadisticasCliente(Cliente clie) {
+				
+				try {
+					TransactionManager tm = new TransactionManager(getPath());
+					
+					EstadisticasCliente Clientes;
+					Clientes = tm.getEstadisticasCliente(clie);
+					return Response.status(200).entity(Clientes).build();
+				} 
+				catch (Exception e) {
+					return Response.status(500).entity(doErrorMessage(e)).build();
+				}
+			}
+			
+			/**
+			 * Metodo GET que trae a los Cliente que son fieles al alojmaiento con id dado por parametro<br/>
+			 * <b>Precondicion: </b> el archivo <em>'conectionData'</em> ha sido inicializado con las credenciales del usuario <br/>
+			 * <b>URL: </b> http://localhost:8080/AlohAndesMaster/rest/clientesfieles/{id} <br/>
+			 * @return	<b>Response Status 200</b> - JSON Cliente que contiene al Cliente cuyo ID corresponda al parametro <br/>
+			 * 			<b>Response Status 500</b> - Excepcion durante el transcurso de la transaccion
+			 */
+			@GET
+			@Path( "clientesfieles/{id: \\d+}" )
+			@Produces( { MediaType.APPLICATION_JSON } )
+			public Response getClientesFielesById( @PathParam( "id" ) Long id )
+			{
+				try{
+					TransactionManager tm = new TransactionManager( getPath( ) );
+					
+					Documentacion Cliente = tm.getClientesFieles(id);
+					return Response.status( 200 ).entity( Cliente ).build( );			
+				}
+				catch( Exception e )
+				{
+					return Response.status( 500 ).entity( doErrorMessage( e ) ).build( );
+				}
+			}
 
 
 
@@ -246,6 +320,28 @@ public class ClientesService {
 		catch( Exception e )
 		{
 			return Response.status( 500 ).entity( doErrorMessage( e ) ).build( );
+		}
+	}
+	/**
+	 * Metodo GET que trae a todos los cliente premium de alohandes. <br/>
+	 * <b>Precondicion: </b> el archivo <em>'conectionData'</em> ha sido inicializado con las credenciales del usuario <br/>
+	 * <b>URL: </b> http://localhost:8080/AlohAndes/rest/Clientes <br/>
+	 * @return	<b>Response Status 200</b> - JSON que contiene a todos los Clientes que estan en la Base de Datos <br/>
+	 * 			<b>Response Status 500</b> - Excepcion durante el transcurso de la transaccion
+	 */			
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON })
+	@Path("premium")
+	public Response getClientesPremium() {
+		
+		try {
+			TransactionManager tm = new TransactionManager(getPath());
+
+			List<ClientePremium> clientes = tm.getClientesPremium();
+			return Response.status(200).entity(clientes).build();
+		} 
+		catch (Exception e) {
+			return Response.status(500).entity(doErrorMessage(e)).build();
 		}
 	}
 }

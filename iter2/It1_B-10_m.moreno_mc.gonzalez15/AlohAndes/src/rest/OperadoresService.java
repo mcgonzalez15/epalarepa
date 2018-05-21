@@ -17,7 +17,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import tm.TransactionManager;
+import vos.Funcionamiento;
+import vos.IndiceOcupacion;
 import vos.Operador;
+import vos.OperadorGanancia;
 
 
 
@@ -177,5 +180,95 @@ public class OperadoresService {
 			return Response.status( 500 ).entity( doErrorMessage( e ) ).build( );
 		}
 	}
+    
+    /**
+   	 * Metodo que recibe un Operador en formato JSON y lo agrega a la Base de Datos <br/>
+   	 * <b>Precondicion: </b> El archivo <em>'conectionData'</em> ha sido inicializado con las credenciales del usuario <br/>
+   	 * <b>URL: </b> http://localhost:8080/TutorialParranderos/rest/Operadors <br/>
+   	 * @param Operador JSON con la informacion del Operador que se desea agregar
+   	 * @return	<b>Response Status 200</b> - JSON que contiene al Operador que ha sido agregado <br/>
+   	 * 			<b>Response Status 500</b> - Excepcion durante el transcurso de la transaccion
+   	 */
+       @GET
+   	@Produces({ MediaType.APPLICATION_JSON})
+   	@Path("gananciasactuales")
+   	public Response getGananciasActualesOperadores() {
+   		try{
+   			TransactionManager tm = new TransactionManager( getPath( ) );
+   			List <OperadorGanancia> x = tm.getGananciasActualesOperadores();
+   			return Response.status( 200 ).entity( x ).build( );			
+   		}
+   		catch( Exception e )
+   		{
+   			return Response.status( 500 ).entity( doErrorMessage( e ) ).build( );
+   		}
+   	}
+       /**
+   	 * Metodo que recibe un Operador en formato JSON y lo agrega a la Base de Datos <br/>
+   	 * <b>Precondicion: </b> El archivo <em>'conectionData'</em> ha sido inicializado con las credenciales del usuario <br/>
+   	 * <b>URL: </b> http://localhost:8080/TutorialParranderos/rest/Operadors <br/>
+   	 * @param Operador JSON con la informacion del Operador que se desea agregar
+   	 * @return	<b>Response Status 200</b> - JSON que contiene al Operador que ha sido agregado <br/>
+   	 * 			<b>Response Status 500</b> - Excepcion durante el transcurso de la transaccion
+   	 */
+       @GET
+   	@Produces({ MediaType.APPLICATION_JSON})
+   	@Path("gananciaspasadas")
+   	public Response getGananciasPasadasOperadores() {
+   		try{
+   			TransactionManager tm = new TransactionManager( getPath( ) );
+   			List <OperadorGanancia> x = tm.getGananciasPasadasOperadores();
+   			return Response.status( 200 ).entity( x ).build( );			
+   		}
+   		catch( Exception e )
+   		{
+   			return Response.status( 500 ).entity( doErrorMessage( e ) ).build( );
+   		}
+   	}
+       /**
+   	 * Metodo que recibe un Operador en formato JSON y lo agrega a la Base de Datos <br/>
+   	 * <b>Precondicion: </b> El archivo <em>'conectionData'</em> ha sido inicializado con las credenciales del usuario <br/>
+   	 * <b>URL: </b> http://localhost:8080/TutorialParranderos/rest/Operadors <br/>
+   	 * @param Operador JSON con la informacion del Operador que se desea agregar
+   	 * @return	<b>Response Status 200</b> - JSON que contiene al Operador que ha sido agregado <br/>
+   	 * 			<b>Response Status 500</b> - Excepcion durante el transcurso de la transaccion
+   	 */
+       @GET
+   	@Produces({ MediaType.APPLICATION_JSON})
+   	@Path("indicesocupaciones")
+   	public Response getIndicesOcupacion() {
+   		try{
+   			TransactionManager tm = new TransactionManager( getPath( ) );
+   			List <IndiceOcupacion> x = tm.getIndicesOcupacion();
+   			return Response.status( 200 ).entity( x ).build( );			
+   		}
+   		catch( Exception e )
+   		{
+   			return Response.status( 500 ).entity( doErrorMessage( e ) ).build( );
+   		}
+   	}
+       /**
+   	 * Metodo que consulta la Base de Datos para dar un informe del uso de alohandes <br/>
+   	 * <b>Precondicion: </b> El archivo <em>'conectionData'</em> ha sido inicializado con las credenciales del usuario <br/>
+   	 * <b>URL: </b> http://localhost:8080/TutorialParranderos/rest/Operadors <br/>
+   	 * @param Operador JSON con la informacion del Operador que se desea agregar
+   	 * @return	<b>Response Status 200</b> - JSON que contiene al Operador que ha sido agregado <br/>
+   	 * 			<b>Response Status 500</b> - Excepcion durante el transcurso de la transaccion
+   	 */
+       @GET
+   	@Produces({ MediaType.APPLICATION_JSON})
+   	@Path("funcionamiento")
+   	public Response getFuncionamientoAlohandes() {
+   		try{
+   			TransactionManager tm = new TransactionManager( getPath( ) );
+   			List <Funcionamiento> x = tm.getFuncionamientoAlohandes();
+   			return Response.status( 200 ).entity( x ).build( );			
+   		}
+   		catch( Exception e )
+   		{
+   			return Response.status( 500 ).entity( doErrorMessage( e ) ).build( );
+   		}
+   	}
+   
 
 }

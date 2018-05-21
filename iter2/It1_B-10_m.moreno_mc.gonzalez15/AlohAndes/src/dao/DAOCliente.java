@@ -1,10 +1,11 @@
-package dao;
+	package dao;
 
 import java.sql.Connection; 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
@@ -22,7 +23,7 @@ public class DAOCliente {
 	/**
 	 * Constante para indicar un usuario Oracle
 	 */
-	public final static String USUARIO = "ISIS2304A431810";
+	public final static String USUARIO = "ISIS2304A551810";
 
 
 	//----------------------------------------------------------------------------------------------------------------------------------
@@ -213,7 +214,6 @@ public class DAOCliente {
 		
 	}
 	
-	/////// CUIDADO WARNING WARNING/////////////
 	
 	/**
 	 * Metodo que obtiene la informacion de todo el uso de alohandes en la Base de Datos <br/>
@@ -304,8 +304,10 @@ public class DAOCliente {
 		recursos.add(prepStmt);
 		ResultSet rs = prepStmt.executeQuery();
 
-		while (rs.next()) {
+		int contador = 0;
+		while (rs.next()&& contador<1000) {
 			clientes.add(convertResultSetToCliente(rs));
+			contador++;
 		}
 		return clientes;
 	}
@@ -341,11 +343,95 @@ public class DAOCliente {
 		recursos.add(prepStmt);
 		ResultSet rs = prepStmt.executeQuery();
 
-		while (rs.next()) {
+		int contador = 0;
+		while (rs.next()&& contador<1000) {
 			clientes.add(convertResultSetToCliente(rs));
+			contador++;
 		}
 		return clientes;
 	}
+	
+	/**
+	 * Metodo que obtiene los clientes premium<br/>
+	 * <b>Precondicion: </b> la conexion a sido inicializada <br/> 
+	 * @param id el identificador del Cliente
+	 * @return la informacion del Cliente que cumple con los criterios de la sentecia SQL
+	 * 			Null si no existe el bebedor conlos criterios establecidos
+	 * @throws SQLException SQLException Genera excepcion si hay error en la conexion o en la consulta SQL
+	 * @throws Exception Si se genera un error dentro del metodo.
+	 */
+	public List<ClientePremium> getClientesPremium() throws SQLException, Exception 
+	{
+
+		ArrayList<ClientePremium> clientes = new ArrayList<>();
+
+		String sql = "WITH Q1 AS( SELECT CLI.ID AS IDQ1, MIN(RESV.COSTO_DEFINITIVO/(TRUNC (RESV.FECHA_FIN) - TRUNC (RESV.FECHA_INICIO))) AS RAZONQ1 FROM CLIENTES CLI INNER JOIN RESERVAS RESV ON CLI.ID=RESV.ID_CLIENTE WHERE CLI.ID NOT IN (SELECT ID_CLIENTE  FROM RESERVAS RESI WHERE (RESI.COSTO_DEFINITIVO/(TRUNC (RESI.FECHA_FIN) - TRUNC (RESI.FECHA_INICIO)))<125) GROUP BY CLI.ID )," + 
+				"Q2 AS ( SELECT CLI.ID AS IDQ2 , COUNT (RES1.ID) AS RAZONQ2 FROM ((CLIENTES CLI INNER JOIN RESERVAS RES1 ON  RES1.ID_CLIENTE=CLI.ID) INNER JOIN HABITACIONES_HOTEL HOT  ON HOT.ID=RES1.ID_ALOJAMIENTO) WHERE CLI.ID NOT IN (SELECT RESER1.ID_CLIENTE FROM RESERVAS  RESER1 INNER JOIN HABITACIONES_HOTEL HO ON HO.ID=RESER1.ID_ALOJAMIENTO WHERE HO.TIPO_HABITACION != 'SUITE') AND CLI.ID NOT IN( SELECT RESER2.ID_CLIENTE FROM RESERVAS  RESER2 INNER JOIN  ALOJAMIENTOS ALOJ ON ALOJ.ID=RESER2.ID_ALOJAMIENTO WHERE ALOJ.TIPO != 'HAB HOTEL' ) AND  CLI.ID IN( SELECT RES.ID_CLIENTE FROM RESERVAS RES ) GROUP BY CLI.ID)," + 
+				"Q3 AS ( SELECT  RES.ID_CLIENTE AS IDQ3,COUNT(DISTINCT(TO_CHAR(RES.FECHA_INICIO,'MM'))*(TO_CHAR(RES.FECHA_INICIO,'YY'))) AS RAZONQ3 FROM RESERVAS RES GROUP BY RES.ID_CLIENTE HAVING COUNT(DISTINCT(TO_CHAR(RES.FECHA_INICIO,'MM'))*(TO_CHAR(RES.FECHA_INICIO,'YY'))) >= ( SELECT COUNT(*) FROM (SELECT  DISTINCT TO_CHAR(FECHA_INICIO,'YY'),TO_CHAR(FECHA_INICIO,'MM') FROM RESERVAS)))," + 
+				"Q4 AS ( SELECT Q1.IDQ1, Q1.RAZONQ1, Q2.IDQ2, Q2.RAZONQ2 FROM Q1 FULL OUTER JOIN Q2 ON Q1.IDQ1 = Q2.IDQ2) " + 
+				"SELECT Q4.IDQ1, Q4.RAZONQ1, Q4.IDQ2, Q4.RAZONQ2, Q3.IDQ3, Q3.RAZONQ3 FROM Q4 FULL OUTER JOIN Q3 ON Q4.IDQ1 = Q3.IDQ3";
+		PreparedStatement prepStmt = conn.prepareStatement(sql);
+		recursos.add(prepStmt);
+		ResultSet rs = prepStmt.executeQuery();
+		System.out.println(sql);
+		int contador = 0;
+		int contador1 = 0;
+		int contador2 = 0;
+		int contador3 = 0;
+		while(rs.next()) {
+			if(contador%10 ==0)
+			{
+				String id = null;
+				String id1 = rs.getString("IDQ1");
+				String id2 = rs.getString("IDQ2");
+				String id3 = rs.getString("IDQ3");
+				if(id1!= null)
+				{
+					id= "El cliente con id: "+id1+" se considera como buen cliente por las siguientes razones: ";
+				}
+				else if( id2 != null)
+				{
+					id= "El cliente con id: "+id2+" se considera como buen cliente por las siguientes razones: ";
+				}
+				else
+				{
+					id= "El cliente con id: "+id3+" se considera como buen cliente por las siguientes razones: ";
+				}
+				ArrayList <String> razones = new ArrayList<>();
+				String razon1 = rs.getString("RAZONQ1");
+				String razon2 = rs.getString("RAZONQ2");
+				String razon3 = rs.getString("RAZONQ3");
+				if(razon1 != null) 
+				{
+					contador1++;
+					razones.add("Todas las reservas del cliente superan los $125 por noche, su reserva mas barata ha sido de: " +razon1);
+				}
+				if(razon2!= null)
+				{
+					contador2++;
+					razones.add("Todas las reservas del cliente han sido en habitaciones de hotel tipo SUITE, ya que de un total de: "+ razon2 +" reservas, "+ razon2 + " han sido de tipo SUITE");
+				}
+				if(razon3 != null)
+				{
+					contador3++;
+					razones.add("El cliente ha hecho una reserva minimo una vez al mes desde el inicio de AlohAndes, con un total de: "+razon3+" reservas");
+				}
+
+				ClientePremium cliente = new ClientePremium(id, razones);
+				clientes.add(cliente);
+				contador++;
+			}
+			contador++;
+			//System.out.println(contador2);
+		}
+		//System.out.println(contador1+" de razon 1 " +contador2+" de razon 2 "+contador3+" de razon 3 "+"de un total de: " +contador );
+		return clientes;
+	
+	}
+	
+	//----------------------------------------------------------------------------------------------------------------------------------
+		// METODOS AUXILIARES
+		//----------------------------------------------------------------------------------------------------------------------------------
 	
 	
 	/**
@@ -381,50 +467,18 @@ public class DAOCliente {
 	public Cliente convertResultSetToCliente(ResultSet resultSet) throws SQLException, Exception {
 
 		long id = Long.parseLong(resultSet.getString("ID"));
+		String tipo = resultSet.getString("TIPO_ID");
 		String nombre = resultSet.getString("NOMBRE");
-		String correo = resultSet.getString("CORREO");
-		String vinculo = resultSet.getString("ID_VINCULO");
-		VinculoUniandes relacion;
-			if(vinculo.equals(VinculoUniandes.ESTUDIANTE.toString()))
-			{
-				relacion = VinculoUniandes.ESTUDIANTE;
-			} else if(vinculo.equals(VinculoUniandes.PROFESOR.toString()))
-			{
-				relacion = VinculoUniandes.PROFESOR;
-			}else if(vinculo.equals(VinculoUniandes.HOTEL.toString()))
-			{
-				relacion = VinculoUniandes.HOTEL;
-			}
-			else if(vinculo.equals(VinculoUniandes.HOSTAL.toString()))
-			{
-				relacion = VinculoUniandes.HOSTAL;
-			}else if(vinculo.equals(VinculoUniandes.EMPLEADO.toString()))
-			{
-				relacion = VinculoUniandes.EMPLEADO;
-			}else if(vinculo.equals(VinculoUniandes.VIVIENDA_UNIVERSITARIA.toString()))
-			{
-				relacion = VinculoUniandes.VIVIENDA_UNIVERSITARIA;
-			}else if(vinculo.equals(VinculoUniandes.FENICIA.toString()))
-			{
-				relacion = VinculoUniandes.FENICIA;
-			} else if(vinculo.equals(VinculoUniandes.PROFESOR_INVITADO.toString()))
-			{
-				relacion = VinculoUniandes.PROFESOR_INVITADO;
-			} else if(vinculo.equals(VinculoUniandes.REGISTRADO.toString()))
-			{
-				relacion = VinculoUniandes.REGISTRADO;
-			} else if(vinculo.equals(VinculoUniandes.EGRESADO.toString()))
-			{
-				relacion = VinculoUniandes.EGRESADO;
-			} else relacion = VinculoUniandes.PADRE_ESTUDIANTE;
-	
-		ArrayList <Oferta> ofertas = new ArrayList <Oferta>();
+		String contacto = resultSet.getString("CONTACTO");
+		long idRelacion = Long.parseLong(resultSet.getString("ID_RELACION"));
+		
+		ArrayList <Oferta> alojamientos = new ArrayList <Oferta>();
 		ArrayList <Contrato> contratos = new ArrayList <Contrato>();
 		ArrayList <Reserva> reservas = new ArrayList <Reserva>();
 		ArrayList <Servicio> servicios = new ArrayList <Servicio>();
+		
+		Cliente ope = new Cliente(id, nombre, contacto, null, contratos, reservas, servicios, alojamientos);
 
-		Cliente convertido = new Cliente(id, nombre, correo, relacion, contratos, reservas, servicios, ofertas);
-
-		return convertido;
+		return ope;
 	}
 }

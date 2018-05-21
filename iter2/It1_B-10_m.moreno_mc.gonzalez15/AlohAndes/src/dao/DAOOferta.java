@@ -26,7 +26,7 @@ public class DAOOferta {
 	/**
 	 * Constante para indicar un usuario Oracle
 	 */
-	public final static String USUARIO = "ISIS2304A431810";
+	public final static String USUARIO = "ISIS2304A551810";
 
 
 	//----------------------------------------------------------------------------------------------------------------------------------

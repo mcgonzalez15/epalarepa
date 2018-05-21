@@ -24,7 +24,7 @@ public class DAOOperador {
 	/**
 	 * Constante para indicar un usuario Oracle
 	 */
-	public final static String USUARIO = "ISIS2304A431810";
+	public final static String USUARIO = "ISIS2304A551810";
 
 
 	//----------------------------------------------------------------------------------------------------------------------------------
@@ -238,7 +238,7 @@ public class DAOOperador {
 		return lista;
 	}
 	/**
-	 * Metodo por el que se obtienen los indices de ocupacion de varios alojamientos<br/>
+	 * Metodo por el que se obtienen los indices de ocupacion de varios OFERTAS<br/>
 	 * <b>Precondicion: </b> la conexion a sido inicializadoa <br/>  
 	 * @throws SQLException SQLException Genera excepcion si hay error en la conexion o en la consulta SQL
 	 * @throws Exception Si se genera un error dentro del metodo.
@@ -269,28 +269,13 @@ public class DAOOperador {
 	
 	
 	/**
-	 * Metodo por el que se obtienen los indices de ocupacion de varios alojamientos<br/>
+	 * Metodo por el que se obtienen los indices de ocupacion de varios OFERTAS<br/>
 	 * <b>Precondicion: </b> la conexion a sido inicializadoa <br/>  
 	 * @throws SQLException SQLException Genera excepcion si hay error en la conexion o en la consulta SQL
 	 * @throws Exception Si se genera un error dentro del metodo.
 	 */
 	public List<Funcionamiento> getFuncionamientoAlohandes() throws SQLException, Exception {
 
-		String sql2 = "WITH Q1 AS (SELECT ALO.ID AS ALOID ,RES.NUM_PERSONAS/ALO.CAPACIDAD AS CAPACI,TO_CHAR(RES.FECHA_INICIO,'IW')AS SEMA FROM ALOJAMIENTOS ALO INNER JOIN RESERVAS RES ON ALO.ID=RES.ID_ALOJAMIENTO WHERE EXTRACT( YEAR FROM FECHA_INICIO) = 2018)," + 
-				"Q2 AS (SELECT MAX(RESE.NUM_PERSONAS/ALOJ.CAPACIDAD) AS CAPACIMAX, TO_CHAR(RESE.FECHA_INICIO,'IW') AS SEMA, MIN(RESE.NUM_PERSONAS/ALOJ.CAPACIDAD) AS CAPACIMIN FROM ALOJAMIENTOS ALOJ INNER JOIN RESERVAS RESE ON ALOJ.ID=RESE.ID_ALOJAMIENTO GROUP BY EXTRACT( YEAR FROM FECHA_INICIO), TO_CHAR(RESE.FECHA_INICIO,'IW') HAVING EXTRACT( YEAR FROM FECHA_INICIO) = 2018)," + 
-				"Q3 AS (SELECT Q1.SEMA AS SEMANA, Q1.ALOID AS ALOJAMIENTOMAX, Q2.CAPACIMAX AS OCUPACIONMAX, Q2.CAPACIMIN AS OCUPACIONMIN FROM Q1  INNER JOIN Q2 ON  Q1.SEMA=Q2.SEMA AND Q1.CAPACI=Q2.CAPACIMAX)," + 
-				"Q4 AS( SELECT Q3.SEMANA, Q3.ALOJAMIENTOMAX, Q3.OCUPACIONMAX, Q1.ALOID AS ALOJAMIENTOMIN, Q3.OCUPACIONMIN FROM Q1 INNER JOIN Q3 ON  Q1.SEMA=Q3.SEMANA AND Q1.CAPACI=Q3.OCUPACIONMIN order by Q1.SEMA ASC)," + 
-				"R1 AS (SELECT SEM, MAX(SOLICI) AS MAXIM, MIN (SOLICI)AS MINIM FROM (SELECT tabla1.SEMANA AS SEM, ALOJAMIENTOS.ID_OPERADOR, SUM(tabla1.CUENTA) AS SOLICI FROM(SELECT TO_CHAR(FECHA_INICIO,'IW')AS SEMANA,ID_ALOJAMIENTO AS ALOJ,  COUNT (ID) AS CUENTA FROM RESERVAS GROUP BY EXTRACT( YEAR FROM FECHA_INICIO), TO_CHAR(FECHA_INICIO,'IW'), ID_ALOJAMIENTO HAVING EXTRACT( YEAR FROM FECHA_INICIO) = 2018 )tabla1 inner join ALOJAMIENTOS ON tabla1.ALOJ = ALOJAMIENTOS.ID GROUP BY tabla1.SEMANA,ALOJAMIENTOS.ID_OPERADOR) GROUP BY SEM  ORDER BY SEM)," + 
-				"R2 AS (SELECT tabla1.SEMANA2 AS SEM2, ALOJAMIENTOS.ID_OPERADOR AS OPER, SUM(tabla1.CUENTA2) AS SOLICI2 FROM(SELECT TO_CHAR(FECHA_INICIO,'IW')AS SEMANA2,ID_ALOJAMIENTO AS ALOJ2,  COUNT (ID) AS CUENTA2 FROM RESERVAS GROUP BY EXTRACT( YEAR FROM FECHA_INICIO), TO_CHAR(FECHA_INICIO,'IW'), ID_ALOJAMIENTO HAVING EXTRACT( YEAR FROM FECHA_INICIO) = 2018 )tabla1 inner join ALOJAMIENTOS ON tabla1.ALOJ2 = ALOJAMIENTOS.ID GROUP BY tabla1.SEMANA2,ALOJAMIENTOS.ID_OPERADOR)," + 
-				"R3 AS ( SELECT R1.SEM , R1.MAXIM, R1.MINIM, R2.OPER FROM R1 INNER JOIN R2 ON R1.SEM = R2.SEM2 AND  R1.MAXIM = R2.SOLICI2 ORDER BY R1.SEM)," + 
-				"R4 AS ( SELECT  R3.SEM AS SEMANA1, R3.OPER AS OPERADORMAX, R3.MAXIM AS MAXIM, R2.OPER AS OPERADORMIN, R3.MINIM AS MINIM FROM R3 INNER JOIN R2 ON R3.SEM = R2.SEM2 AND  R3.MINIM = R2.SOLICI2 ORDER BY R3.SEM)" + 
-				"SELECT Q4.SEMANA ,Q4.ALOJAMIENTOMAX, Q4.OCUPACIONMAX, Q4.ALOJAMIENTOMIN, Q4.OCUPACIONMIN, R4.OPERADORMAX , R4.MAXIM , R4.OPERADORMIN, R4.MINIM FROM Q4 INNER JOIN R4 ON Q4.SEMANA = R4.SEMANA1 ORDER BY Q4.SEMANA";
-		System.out.println(sql2);
-		
-		PreparedStatement prepStmt2 = conn.prepareStatement(sql2);
-		recursos.add(prepStmt2);
-		ResultSet rs = prepStmt2.executeQuery();
-		
 		ArrayList<Funcionamiento> lista = new ArrayList<Funcionamiento>();
 		for (int i = 0; i <= 52; i++) {
 			ArrayList <Integer> idAlojMin = new ArrayList<>(); 
@@ -300,18 +285,20 @@ public class DAOOperador {
 			Funcionamiento func = new Funcionamiento(i+1, idAlojMin, 0.0,idAlojMax, 0.0, idOperMin, 0, idOperMax, 0);
 			lista.add(func);
 		}
+		
+		String sql2 = "WITH R1 AS (SELECT SEM, MAX(SOLICI) AS MAXIM, MIN (SOLICI)AS MINIM FROM (SELECT tabla1.SEMANA AS SEM, OFERTAS.ID_OPERADOR, SUM(tabla1.CUENTA) AS SOLICI FROM(SELECT TO_CHAR(FECHA_INICIO,'IW')AS SEMANA,ID_ALOJAMIENTO AS ALOJ,  COUNT (ID) AS CUENTA FROM RESERVAS GROUP BY EXTRACT( YEAR FROM FECHA_INICIO), TO_CHAR(FECHA_INICIO,'IW'), ID_ALOJAMIENTO HAVING EXTRACT( YEAR FROM FECHA_INICIO) = 2018 )tabla1 inner join OFERTAS ON tabla1.ALOJ = OFERTAS.ID GROUP BY tabla1.SEMANA,OFERTAS.ID_OPERADOR) GROUP BY SEM )," + 
+				"R2 AS (SELECT tabla1.SEMANA2 AS SEM2, OFERTAS.ID_OPERADOR AS OPER, SUM(tabla1.CUENTA2) AS SOLICI2 FROM(SELECT TO_CHAR(FECHA_INICIO,'IW')AS SEMANA2,ID_ALOJAMIENTO AS ALOJ2,  COUNT (ID) AS CUENTA2 FROM RESERVAS GROUP BY EXTRACT( YEAR FROM FECHA_INICIO), TO_CHAR(FECHA_INICIO,'IW'), ID_ALOJAMIENTO HAVING EXTRACT( YEAR FROM FECHA_INICIO) = 2018 )tabla1 inner join OFERTAS ON tabla1.ALOJ2 = OFERTAS.ID GROUP BY tabla1.SEMANA2,OFERTAS.ID_OPERADOR)," + 
+				"R3 AS ( SELECT R1.SEM , R1.MAXIM, R1.MINIM, R2.OPER FROM R1 INNER JOIN R2 ON R1.SEM = R2.SEM2 AND  R1.MAXIM = R2.SOLICI2)" + 
+				"SELECT  R3.SEM AS SEMANA , R3.OPER AS OPERADORMAX, R3.MAXIM, R2.OPER AS OPERADORMIN, R3.MINIM FROM R3 INNER JOIN R2 ON R3.SEM = R2.SEM2 AND  R3.MINIM = R2.SOLICI2";
+		System.out.println(sql2);
+		
+		PreparedStatement prepStmt2 = conn.prepareStatement(sql2);
+		recursos.add(prepStmt2);
+		ResultSet rs = prepStmt2.executeQuery();
+		
 		while(rs.next()) {
 			String semana = rs.getString("SEMANA");
 			int semana1 = Integer.parseInt(semana);
-			
-			String alojamientoMax = rs.getString("ALOJAMIENTOMAX");
-			int alojamientoMax1 = Integer.parseInt(alojamientoMax);
-			String ocupacionMax = rs.getString("OCUPACIONMAX");
-			double ocupacionMax1 = Double.parseDouble(ocupacionMax);
-			String alojamientoMin = rs.getString("ALOJAMIENTOMIN");
-			int alojamientoMin1 = Integer.parseInt(alojamientoMin);
-			String ocupacionMin = rs.getString("OCUPACIONMIN");
-			double ocupacionMin1 = Double.parseDouble(ocupacionMin);
 			
 			String operadorMax = rs.getString("OPERADORMAX");
 			int operadorMax1 = Integer.parseInt(operadorMax);
@@ -322,15 +309,41 @@ public class DAOOperador {
 			String solicitudesMin = rs.getString("MINIM");
 			int solicitudesMin1 = Integer.parseInt(solicitudesMin);
 			
-			lista.get(semana1-1).agregarAlojamientoMax(alojamientoMax1);
-			lista.get(semana1-1).agregarAlojamientoMin(alojamientoMin1);
 			lista.get(semana1-1).agregarOperadorMax(operadorMax1);
 			lista.get(semana1-1).agregarOperadorMin(operadorMin1);
 			lista.get(semana1-1).setNumSolicitudesMax(solicitudesMax1);
 			lista.get(semana1-1).setNumSolicitudesMin(solicitudesMin1);
+			
+		}
+		rs.close();
+		System.out.println("termino");
+		
+		String sql3 = "WITH Q1 AS (SELECT ALO.ID AS ALOID ,RES.NUM_PERSONAS/ALO.CAPACIDAD AS CAPACI,TO_CHAR(RES.FECHA_INICIO,'IW')AS SEMA FROM OFERTAS ALO INNER JOIN RESERVAS RES ON ALO.ID=RES.ID_ALOJAMIENTO WHERE EXTRACT( YEAR FROM FECHA_INICIO) = 2018), " + 
+				"Q2 AS (SELECT MAX(RESE.NUM_PERSONAS/ALOJ.CAPACIDAD) AS CAPACIMAX, TO_CHAR(RESE.FECHA_INICIO,'IW') AS SEMA, MIN(RESE.NUM_PERSONAS/ALOJ.CAPACIDAD) AS CAPACIMIN FROM OFERTAS ALOJ INNER JOIN RESERVAS RESE ON ALOJ.ID=RESE.ID_ALOJAMIENTO GROUP BY EXTRACT( YEAR FROM FECHA_INICIO), TO_CHAR(RESE.FECHA_INICIO,'IW') HAVING EXTRACT( YEAR FROM FECHA_INICIO) = 2018)," + 
+				"Q3 AS (SELECT Q1.SEMA AS SEMANA, Q1.ALOID AS ALOJAMIENTOMAX, Q2.CAPACIMAX AS OCUPACIONMAX, Q2.CAPACIMIN AS OCUPACIONMIN FROM Q1  INNER JOIN Q2 ON  Q1.SEMA=Q2.SEMA AND Q1.CAPACI=Q2.CAPACIMAX)" + 
+				"SELECT Q3.SEMANA, Q3.ALOJAMIENTOMAX, Q3.OCUPACIONMAX, Q1.ALOID AS ALOJAMIENTOMIN, Q3.OCUPACIONMIN FROM Q1 INNER JOIN Q3 ON  Q1.SEMA=Q3.SEMANA AND Q1.CAPACI=Q3.OCUPACIONMIN";
+		System.out.println(sql3);
+		PreparedStatement prepStmt3 = conn.prepareStatement(sql3);
+		recursos.add(prepStmt3);
+		ResultSet rs3 = prepStmt3.executeQuery();
+		while(rs3.next())
+		{
+			String semana = rs3.getString("SEMANA");
+			int semana1 = Integer.parseInt(semana);
+			
+			String alojamientoMax = rs3.getString("ALOJAMIENTOMAX");
+			int alojamientoMax1 = Integer.parseInt(alojamientoMax);
+			String ocupacionMax = rs3.getString("OCUPACIONMAX");
+			double ocupacionMax1 = Double.parseDouble(ocupacionMax);
+			String alojamientoMin = rs3.getString("ALOJAMIENTOMIN");
+			int alojamientoMin1 = Integer.parseInt(alojamientoMin);
+			String ocupacionMin = rs3.getString("OCUPACIONMIN");
+			double ocupacionMin1 = Double.parseDouble(ocupacionMin);
+			
+			lista.get(semana1-1).agregarAlojamientoMax(alojamientoMax1);
+			lista.get(semana1-1).agregarAlojamientoMin(alojamientoMin1);
 			lista.get(semana1-1).setOcupacionMax(ocupacionMax1);
 			lista.get(semana1-1).setOcupacionMin(ocupacionMin1);
-			
 		}
 		return lista;
 	}
